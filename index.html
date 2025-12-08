@@ -3,88 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalman Filter - Real Data Proof</title>
+    <title>Kalman Filter - Interactive Educational Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #0a192f 0%, #112240 100%);
+            font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
-            color: #fff;
+            color: #2c3e50;
+            line-height: 1.6;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
         }
 
         header {
             text-align: center;
-            padding: 20px 0;
+            padding: 30px 0;
+            border-bottom: 2px solid #1a365d;
+            margin-bottom: 30px;
         }
 
         header h1 {
-            font-size: 2rem;
-            background: linear-gradient(90deg, #64ffda, #00d4ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: #1a365d;
+            letter-spacing: -0.5px;
         }
 
-        header p { color: #8892b0; margin-top: 8px; }
+        header p { 
+            color: #4a5568; 
+            margin-top: 10px; 
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        /* ACADEMIC BADGE */
+        .academic-badge {
+            display: inline-block;
+            background: #1a365d;
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 12px;
+        }
 
         /* DATA SOURCE SELECTOR */
         .data-selector {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
             margin: 25px 0;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .data-btn {
-            padding: 12px 20px;
-            border: 2px solid #64ffda;
-            background: rgba(100, 255, 218, 0.05);
-            color: #64ffda;
-            border-radius: 10px;
+            padding: 10px 18px;
+            border: 2px solid #1a365d;
+            background: #fff;
+            color: #1a365d;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .data-btn:hover {
-            background: rgba(100, 255, 218, 0.15);
-            transform: translateY(-2px);
+            background: #edf2f7;
+            transform: translateY(-1px);
         }
 
         .data-btn.active {
-            background: #64ffda;
-            color: #0a192f;
-            font-weight: bold;
+            background: #1a365d;
+            color: #fff;
         }
 
-        .data-btn .icon { margin-right: 8px; }
+        .data-btn .icon { margin-right: 6px; }
 
         /* LIVE DATA INDICATOR */
         .live-indicator {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid #ff6b6b;
+            background: #fff;
+            border: 1px solid #cbd5e0;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
-            color: #ff6b6b;
+            color: #718096;
             margin-top: 15px;
         }
 
         .live-indicator.live {
-            background: rgba(100, 255, 218, 0.1);
-            border-color: #64ffda;
-            color: #64ffda;
+            background: #f0fff4;
+            border-color: #38a169;
+            color: #276749;
         }
 
         .live-dot {
@@ -103,8 +130,8 @@
         /* PANELS */
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 20px;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
         }
 
         @media (max-width: 1100px) {
@@ -112,16 +139,21 @@
         }
 
         .panel {
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .panel-title {
-            font-size: 1rem;
-            color: #64ffda;
-            margin-bottom: 15px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1a365d;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -129,34 +161,41 @@
 
         /* DATA INFO */
         .data-info {
-            background: rgba(100, 255, 218, 0.05);
-            border-left: 3px solid #64ffda;
-            padding: 15px;
+            background: #f7fafc;
+            border-left: 4px solid #1a365d;
+            padding: 18px;
             border-radius: 0 8px 8px 0;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .data-info h3 {
-            color: #64ffda;
-            font-size: 1.1rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            font-size: 1.2rem;
             margin-bottom: 8px;
         }
 
         .data-info p {
-            color: #a8b2d1;
-            font-size: 0.9rem;
-            line-height: 1.5;
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
         .data-info .source {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: #8892b0;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #718096;
+            font-style: italic;
         }
 
         .data-info .source a {
-            color: #64ffda;
+            color: #2b6cb0;
             text-decoration: none;
+            border-bottom: 1px dashed #2b6cb0;
+        }
+
+        .data-info .source a:hover {
+            color: #1a365d;
         }
 
         /* CHARTS */
@@ -166,42 +205,45 @@
 
         .chart-container canvas {
             width: 100%;
-            border-radius: 8px;
-            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
         }
 
         .chart-title {
-            color: #ccd6f6;
-            font-size: 0.9rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #2d3748;
+            font-size: 1rem;
             margin-bottom: 10px;
             text-align: center;
+            font-weight: 600;
         }
 
         /* LEGEND */
         .legend {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
             flex-wrap: wrap;
-            margin: 12px 0;
-            font-size: 0.85rem;
+            margin: 15px 0;
+            font-size: 0.9rem;
         }
 
         .legend-item {
             display: flex;
             align-items: center;
-            gap: 6px;
-            color: #8892b0;
+            gap: 8px;
+            color: #4a5568;
         }
 
         .legend-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
         }
 
         .legend-line {
-            width: 20px;
+            width: 24px;
             height: 3px;
             border-radius: 2px;
         }
@@ -210,129 +252,150 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
 
         .stat-card {
-            background: rgba(0,0,0,0.2);
+            background: #f7fafc;
             border-radius: 8px;
-            padding: 12px;
+            padding: 15px;
             text-align: center;
+            border: 1px solid #e2e8f0;
         }
 
         .stat-card .label {
-            color: #8892b0;
-            font-size: 0.7rem;
+            color: #718096;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .stat-card .value {
-            font-size: 1.3rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
             font-weight: bold;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        .stat-card .value.good { color: #64ffda; }
-        .stat-card .value.bad { color: #ff6b6b; }
-        .stat-card .value.neutral { color: #00d4ff; }
+        .stat-card .value.good { color: #276749; }
+        .stat-card .value.bad { color: #c53030; }
+        .stat-card .value.neutral { color: #2b6cb0; }
 
         /* PROOF BOX */
         .proof-box {
-            background: linear-gradient(135deg, rgba(100,255,218,0.1), rgba(0,212,255,0.05));
-            border: 1px solid rgba(100,255,218,0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 18px 0;
         }
 
         .proof-box h4 {
-            color: #64ffda;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #276749;
+            font-size: 1rem;
+            margin-bottom: 12px;
         }
 
         .proof-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.85rem;
+            padding: 10px 0;
+            border-bottom: 1px solid #c6f6d5;
+            font-size: 0.9rem;
         }
 
         .proof-item:last-child { border-bottom: none; }
 
-        .proof-item .label { color: #a8b2d1; }
+        .proof-item .label { color: #4a5568; }
 
         .proof-item .value {
-            font-weight: bold;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        .proof-item .value.pass { color: #64ffda; }
-        .proof-item .value.fail { color: #ff6b6b; }
+        .proof-item .value.pass { color: #276749; }
+        .proof-item .value.fail { color: #c53030; }
 
         /* CONTROLS */
         .control-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .control-label {
             display: flex;
             justify-content: space-between;
-            color: #8892b0;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
         }
 
-        .control-value { color: #64ffda; }
+        .control-value { 
+            color: #1a365d; 
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         input[type="range"] {
             width: 100%;
-            height: 5px;
+            height: 6px;
             -webkit-appearance: none;
-            background: rgba(255,255,255,0.1);
+            appearance: none;
+            background: #e2e8f0;
             border-radius: 3px;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: #64ffda;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #1a365d;
             border-radius: 50%;
             cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
         .btn-row {
             display: flex;
-            gap: 8px;
-            margin: 12px 0;
+            gap: 10px;
+            margin: 15px 0;
         }
 
         .btn {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: none;
             border-radius: 6px;
             font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
         }
 
         .btn-primary {
-            background: #64ffda;
-            color: #0a192f;
-            font-weight: bold;
+            background: #1a365d;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2c5282;
         }
 
         .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
         }
 
         .btn:hover { transform: translateY(-1px); }
@@ -341,39 +404,44 @@
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.8rem;
-            margin-top: 10px;
+            font-size: 0.85rem;
+            margin-top: 12px;
         }
 
         .data-table th, .data-table td {
-            padding: 8px 6px;
+            padding: 10px 8px;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .data-table th {
-            color: #64ffda;
-            font-weight: 500;
+            background: #f7fafc;
+            color: #1a365d;
+            font-weight: 600;
             text-transform: uppercase;
             font-size: 0.7rem;
             letter-spacing: 1px;
         }
 
-        .data-table td { color: #a8b2d1; }
-        .data-table td.highlight { color: #64ffda; font-weight: bold; }
+        .data-table td { color: #4a5568; }
+        .data-table td.highlight { color: #276749; font-weight: 600; }
+
+        .data-table tr:hover {
+            background: #f7fafc;
+        }
 
         /* LOADING */
         .loading {
             text-align: center;
             padding: 40px;
-            color: #8892b0;
+            color: #718096;
         }
 
         .loading .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid rgba(100,255,218,0.2);
-            border-top-color: #64ffda;
+            border: 3px solid #e2e8f0;
+            border-top-color: #1a365d;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
@@ -388,120 +456,127 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.8rem;
-            color: #8892b0;
-            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 12px;
         }
 
         .api-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
 
-        .api-dot.online { background: #64ffda; }
-        .api-dot.offline { background: #ff6b6b; }
+        .api-dot.online { background: #48bb78; }
+        .api-dot.offline { background: #fc8181; }
 
         /* COMPARISON BARS */
         .comparison-bars {
-            margin-top: 15px;
+            margin-top: 18px;
         }
 
         .compare-row {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
         .compare-label {
             display: flex;
             justify-content: space-between;
-            font-size: 0.8rem;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
         }
 
-        .compare-label .name { color: #a8b2d1; }
-        .compare-label .value { color: #64ffda; }
+        .compare-label .name { color: #4a5568; }
+        .compare-label .value { 
+            color: #1a365d; 
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
 
         .compare-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
             overflow: hidden;
         }
 
         .compare-fill {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 5px;
             transition: width 0.5s;
         }
 
-        .compare-fill.raw { background: #ff6b6b; }
-        .compare-fill.kalman { background: linear-gradient(90deg, #64ffda, #00d4ff); }
+        .compare-fill.raw { background: #fc8181; }
+        .compare-fill.kalman { background: linear-gradient(90deg, #48bb78, #38a169); }
 
         /* COMPARISON CHARTS LAYOUT */
         .comparison-charts {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
         }
 
         .chart-box {
             flex: 1;
             max-width: 420px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 12px;
-            padding: 15px;
-            border: 2px solid transparent;
+            background: #fff;
+            border-radius: 8px;
+            padding: 18px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .chart-box.before {
-            border-color: rgba(255, 107, 107, 0.3);
+            border-color: #feb2b2;
         }
 
         .chart-box.after {
-            border-color: rgba(100, 255, 218, 0.3);
+            border-color: #9ae6b4;
         }
 
         .chart-label {
             text-align: center;
-            font-size: 1rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 1.05rem;
             font-weight: 600;
-            margin-bottom: 10px;
-            padding: 8px;
+            margin-bottom: 12px;
+            padding: 10px;
             border-radius: 6px;
         }
 
         .chart-box.before .chart-label {
-            background: rgba(255, 107, 107, 0.15);
-            color: #ff6b6b;
+            background: #fff5f5;
+            color: #c53030;
         }
 
         .chart-box.after .chart-label {
-            background: rgba(100, 255, 218, 0.15);
-            color: #64ffda;
+            background: #f0fff4;
+            color: #276749;
         }
 
         .chart-stats {
             display: flex;
             justify-content: space-around;
-            margin-top: 10px;
-            font-size: 0.8rem;
+            margin-top: 12px;
+            font-size: 0.85rem;
         }
 
         .stat-item {
-            color: #8892b0;
+            color: #718096;
         }
 
         .stat-item strong {
-            color: #c9d1d9;
+            font-family: 'JetBrains Mono', monospace;
+            color: #2d3748;
         }
 
         .chart-box.before .stat-item strong {
-            color: #ff6b6b;
+            color: #c53030;
         }
 
         .chart-box.after .stat-item strong {
-            color: #64ffda;
+            color: #276749;
         }
 
         .arrow-container {
@@ -513,14 +588,15 @@
 
         .arrow {
             font-size: 2.5rem;
-            color: #64ffda;
+            color: #1a365d;
             animation: pulse-arrow 1.5s ease-in-out infinite;
         }
 
         .arrow-label {
-            font-size: 0.75rem;
-            color: #8892b0;
+            font-size: 0.8rem;
+            color: #718096;
             text-align: center;
+            font-weight: 600;
         }
 
         @keyframes pulse-arrow {
@@ -542,101 +618,116 @@
 
         /* EXPLANATION SECTION */
         .explanation-section {
-            background: rgba(100, 255, 218, 0.03);
-            border: 1px solid rgba(100, 255, 218, 0.2);
-            border-radius: 12px;
-            padding: 25px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 30px;
             margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .explanation-section h2 {
-            color: #64ffda;
-            font-size: 1.5rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            font-size: 1.6rem;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         .equation-box {
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             padding: 20px;
-            margin: 15px 0;
+            margin: 18px 0;
             text-align: center;
         }
 
         .equation {
-            font-family: 'Times New Roman', serif;
-            font-size: 1.2rem;
-            color: #c9d1d9;
-            margin: 10px 0;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 1.3rem;
+            color: #2d3748;
+            margin: 12px 0;
         }
 
         .equation-label {
+            font-family: 'Source Sans Pro', sans-serif;
             font-size: 0.85rem;
-            color: #64ffda;
-            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1a365d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
         .step-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
+            gap: 18px;
+            margin: 25px 0;
         }
 
         .step-card {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            padding: 15px;
-            border-left: 3px solid #64ffda;
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 18px;
+            border-left: 4px solid #1a365d;
         }
 
         .step-card h4 {
-            color: #64ffda;
-            margin-bottom: 10px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .step-card p {
-            font-size: 0.9rem;
-            color: #a8b2d1;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            color: #4a5568;
+            line-height: 1.7;
         }
 
         .step-card code {
-            background: rgba(100, 255, 218, 0.1);
-            padding: 2px 6px;
+            background: #edf2f7;
+            padding: 2px 8px;
             border-radius: 4px;
-            color: #64ffda;
-            font-family: 'Consolas', monospace;
+            color: #1a365d;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
         }
 
         /* CALCULATOR SECTION */
         .calculator-section {
-            background: rgba(255, 107, 107, 0.03);
-            border: 1px solid rgba(255, 107, 107, 0.2);
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 20px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .calculator-section h2 {
-            color: #ff6b6b;
-            font-size: 1.5rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            font-size: 1.6rem;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
         }
 
         .calc-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
         }
 
         @media (max-width: 800px) {
@@ -646,75 +737,84 @@
         }
 
         .calc-inputs {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
             padding: 20px;
+            border: 1px solid #e2e8f0;
         }
 
         .calc-inputs h4 {
-            color: #c9d1d9;
-            margin-bottom: 15px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            margin-bottom: 18px;
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
         }
 
         .input-group label {
             display: block;
-            font-size: 0.85rem;
-            color: #8892b0;
-            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: #4a5568;
+            margin-bottom: 6px;
+            font-weight: 600;
         }
 
         .input-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(100, 255, 218, 0.3);
-            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
             border-radius: 6px;
-            color: #fff;
+            color: #2d3748;
             font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .input-group input:focus {
             outline: none;
-            border-color: #64ffda;
+            border-color: #1a365d;
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
         }
 
         .calc-btn {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(90deg, #64ffda, #00d4ff);
+            padding: 14px;
+            background: #1a365d;
             border: none;
-            border-radius: 8px;
-            color: #0a192f;
-            font-weight: bold;
+            border-radius: 6px;
+            color: #fff;
+            font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            font-size: 1rem;
         }
 
         .calc-btn:hover {
-            transform: scale(1.02);
+            background: #2c5282;
+            transform: translateY(-1px);
         }
 
         .calc-results {
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
+            background: #f7fafc;
+            border-radius: 8px;
             padding: 20px;
+            border: 1px solid #e2e8f0;
         }
 
         .calc-results h4 {
-            color: #c9d1d9;
-            margin-bottom: 15px;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: #1a365d;
+            margin-bottom: 18px;
         }
 
         .result-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .result-row:last-child {
@@ -722,67 +822,70 @@
         }
 
         .result-label {
-            color: #8892b0;
+            color: #4a5568;
             font-size: 0.9rem;
         }
 
         .result-value {
-            color: #64ffda;
-            font-weight: bold;
-            font-family: 'Consolas', monospace;
+            color: #276749;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         .calc-step {
-            background: rgba(100, 255, 218, 0.05);
+            background: #edf2f7;
             border-radius: 6px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.85rem;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            border-left: 3px solid #1a365d;
         }
 
         .calc-step .step-title {
-            color: #64ffda;
-            font-weight: bold;
-            margin-bottom: 5px;
+            color: #1a365d;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
 
         .calc-step .step-formula {
-            font-family: 'Consolas', monospace;
-            color: #c9d1d9;
+            font-family: 'JetBrains Mono', monospace;
+            color: #2d3748;
         }
 
         .variable-explain {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .var-item {
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
+            background: #f7fafc;
+            padding: 12px;
             border-radius: 6px;
+            border: 1px solid #e2e8f0;
         }
 
         .var-item .var-symbol {
-            color: #ff6b6b;
+            color: #c53030;
             font-weight: bold;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.1rem;
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 1.15rem;
         }
 
         .var-item .var-desc {
-            font-size: 0.8rem;
-            color: #8892b0;
-            margin-top: 3px;
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📊 Kalman Filter on Real Data</h1>
-            <p>Proof using actual datasets - not simulated noise</p>
+            <h1>Kalman Filter: Interactive Educational Visualization</h1>
+            <p>A probabilistic approach to signal estimation and noise reduction</p>
+            <div class="academic-badge">Probability & Statistics • Final Project</div>
             <div class="live-indicator" id="liveIndicator">
                 <div class="live-dot"></div>
                 <span id="statusText">Loading data...</span>
@@ -1636,25 +1739,25 @@
             // Clear Before chart
             const beforeCanvas = document.getElementById('beforeChart');
             const beforeCtx = beforeCanvas.getContext('2d');
-            beforeCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            beforeCtx.fillStyle = '#fff5f5';
             beforeCtx.fillRect(0, 0, beforeCanvas.width, beforeCanvas.height);
             
             // Clear After chart
             const afterCanvas = document.getElementById('afterChart');
             const afterCtx = afterCanvas.getContext('2d');
-            afterCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            afterCtx.fillStyle = '#f0fff4';
             afterCtx.fillRect(0, 0, afterCanvas.width, afterCanvas.height);
             
             // Clear variance chart
             const varCanvas = document.getElementById('varianceChart');
             const varCtx = varCanvas.getContext('2d');
-            varCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            varCtx.fillStyle = '#f7fafc';
             varCtx.fillRect(0, 0, varCanvas.width, varCanvas.height);
             
             // Clear gain chart
             const gainCanvas = document.getElementById('gainChart');
             const gainCtx = gainCanvas.getContext('2d');
-            gainCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            gainCtx.fillStyle = '#f7fafc';
             gainCtx.fillRect(0, 0, gainCanvas.width, gainCanvas.height);
             
             // Reset stats display
@@ -1812,8 +1915,8 @@
             const ctx = canvas.getContext('2d');
             const W = canvas.width, H = canvas.height;
 
-            // Clear with dark background
-            ctx.fillStyle = 'rgba(30, 20, 20, 0.9)';
+            // Clear with light academic background
+            ctx.fillStyle = '#fff5f5';
             ctx.fillRect(0, 0, W, H);
 
             if (filteredData.length < 2) return;
@@ -1834,7 +1937,7 @@
             const scaleY = v => pad.top + plotH - ((v - minY) / range) * plotH;
 
             // Grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.08)';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -1845,7 +1948,7 @@
             }
 
             // Draw RAW data as a LINE (noisy)
-            ctx.strokeStyle = '#ff6b6b';
+            ctx.strokeStyle = '#c53030';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             for (let i = 0; i < filteredData.length; i++) {
@@ -1855,8 +1958,8 @@
             ctx.stroke();
 
             // Axis labels
-            ctx.fillStyle = '#8892b0';
-            ctx.font = '9px Segoe UI';
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '10px Source Sans Pro, Segoe UI';
             ctx.textAlign = 'right';
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -1865,8 +1968,8 @@
             }
 
             // Title inside chart
-            ctx.fillStyle = 'rgba(255, 107, 107, 0.7)';
-            ctx.font = 'bold 11px Segoe UI';
+            ctx.fillStyle = '#c53030';
+            ctx.font = 'bold 11px Source Sans Pro, Segoe UI';
             ctx.textAlign = 'left';
             ctx.fillText('Raw Noisy Signal', pad.left + 5, pad.top + 15);
         }
@@ -1876,8 +1979,8 @@
             const ctx = canvas.getContext('2d');
             const W = canvas.width, H = canvas.height;
 
-            // Clear with dark background
-            ctx.fillStyle = 'rgba(20, 30, 30, 0.9)';
+            // Clear with light academic background
+            ctx.fillStyle = '#f0fff4';
             ctx.fillRect(0, 0, W, H);
 
             if (filteredData.length < 2) return;
@@ -1898,7 +2001,7 @@
             const scaleY = v => pad.top + plotH - ((v - minY) / range) * plotH;
 
             // Grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.08)';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -1909,7 +2012,7 @@
             }
 
             // Confidence band
-            ctx.fillStyle = 'rgba(100, 255, 218, 0.15)';
+            ctx.fillStyle = 'rgba(72, 187, 120, 0.2)';
             ctx.beginPath();
             for (let i = 0; i < filteredData.length; i++) {
                 const sigma = Math.sqrt(filteredData[i].P) * 0.5;
@@ -1926,7 +2029,7 @@
             ctx.fill();
 
             // Draw FILTERED data as a smooth LINE
-            ctx.strokeStyle = '#64ffda';
+            ctx.strokeStyle = '#276749';
             ctx.lineWidth = 2;
             ctx.beginPath();
             for (let i = 0; i < filteredData.length; i++) {
@@ -1936,8 +2039,8 @@
             ctx.stroke();
 
             // Axis labels
-            ctx.fillStyle = '#8892b0';
-            ctx.font = '9px Segoe UI';
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '10px Source Sans Pro, Segoe UI';
             ctx.textAlign = 'right';
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -1946,8 +2049,8 @@
             }
 
             // Title inside chart
-            ctx.fillStyle = 'rgba(100, 255, 218, 0.7)';
-            ctx.font = 'bold 11px Segoe UI';
+            ctx.fillStyle = '#276749';
+            ctx.font = 'bold 11px Source Sans Pro, Segoe UI';
             ctx.textAlign = 'left';
             ctx.fillText('Kalman Filtered Signal', pad.left + 5, pad.top + 15);
         }
@@ -1957,7 +2060,7 @@
             const ctx = canvas.getContext('2d');
             const W = canvas.width, H = canvas.height;
 
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillStyle = '#f7fafc';
             ctx.fillRect(0, 0, W, H);
 
             if (filteredData.length < 20) return;
@@ -1984,7 +2087,7 @@
             const scaleY = v => pad.top + plotH - (v / maxVar) * plotH;
 
             // Raw variance
-            ctx.strokeStyle = '#ff6b6b';
+            ctx.strokeStyle = '#c53030';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             for (let i = 0; i < rawVars.length; i++) {
@@ -1994,7 +2097,7 @@
             ctx.stroke();
 
             // Filtered variance
-            ctx.strokeStyle = '#64ffda';
+            ctx.strokeStyle = '#276749';
             ctx.lineWidth = 2;
             ctx.beginPath();
             for (let i = 0; i < filtVars.length; i++) {
@@ -2009,7 +2112,7 @@
             const ctx = canvas.getContext('2d');
             const W = canvas.width, H = canvas.height;
 
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.fillStyle = '#f7fafc';
             ctx.fillRect(0, 0, W, H);
 
             if (kalmanGains.length < 2) return;
@@ -2022,7 +2125,7 @@
             const scaleY = v => pad.top + plotH - v * plotH;
 
             // Grid
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
             ctx.lineWidth = 1;
             [0, 0.5, 1].forEach(v => {
                 const y = scaleY(v);
@@ -2031,14 +2134,14 @@
                 ctx.lineTo(W - pad.right, y);
                 ctx.stroke();
 
-                ctx.fillStyle = '#8892b0';
-                ctx.font = '9px Segoe UI';
+                ctx.fillStyle = '#4a5568';
+                ctx.font = '10px Source Sans Pro, Segoe UI';
                 ctx.textAlign = 'right';
                 ctx.fillText(v.toFixed(1), pad.left - 3, y + 3);
             });
 
             // Gain line
-            ctx.strokeStyle = '#f59e0b';
+            ctx.strokeStyle = '#2b6cb0';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             for (let i = 0; i < kalmanGains.length; i++) {
