@@ -130,20 +130,9 @@ After using this visualization, you will understand:
 - ✅ How uncertainty decreases with more data
 - ✅ Real-world applications of probability theory
 
-## 📸 Screenshots
-
-### Main Visualization
-*Before/After comparison showing noise reduction*
-
-### Interactive Calculator
-*Step-by-step Kalman Filter calculation*
-
-### Probability Explanation
-*Simple math with intuitive examples*
-
 ## 👨‍💻 Author
 
-**Your Name**  
+**Tran Hoai Nhan - Le Hong Nhat Tan**  
 Final Project - Probability and Statistics Course  
 December 2025
 
@@ -154,7 +143,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 🙏 Acknowledgments
 
 - Rudolf E. Kálmán - Creator of the Kalman Filter (1960)
-- Probability and Statistics course instructors
+- Dr. Tran Vinh Linh
 - Various online resources for understanding Kalman Filter applications
 
 ---
