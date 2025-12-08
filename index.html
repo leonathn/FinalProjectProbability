@@ -960,15 +960,15 @@
                     
                     <div class="legend" style="margin-top: 15px;">
                         <div class="legend-item">
-                            <div class="legend-line" style="background: #ff6b6b;"></div>
+                            <div class="legend-line" style="background: #c53030;"></div>
                             <span>Raw Data Line</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-line" style="background: #64ffda;"></div>
+                            <div class="legend-line" style="background: #276749;"></div>
                             <span>Kalman Filtered Line</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-line" style="background: rgba(100,255,218,0.3); height: 10px;"></div>
+                            <div class="legend-line" style="background: rgba(39,103,73,0.3); height: 10px;"></div>
                             <span>Confidence Band</span>
                         </div>
                     </div>
@@ -1113,11 +1113,11 @@
                 <!-- Why Real Data Matters -->
                 <div class="panel" style="margin-top: 15px;">
                     <div class="panel-title">❓ Why Real Data Proves It</div>
-                    <div style="font-size: 0.85rem; color: #a8b2d1; line-height: 1.6;">
-                        <p><strong style="color: #64ffda;">1. Not Cherry-Picked:</strong> This data comes from actual sources, not carefully crafted to make the filter look good.</p>
-                        <p style="margin-top: 8px;"><strong style="color: #64ffda;">2. Real Noise Patterns:</strong> Financial/sensor data has complex noise - not simple Gaussian.</p>
-                        <p style="margin-top: 8px;"><strong style="color: #64ffda;">3. Verifiable:</strong> You can check the source data yourself.</p>
-                        <p style="margin-top: 8px;"><strong style="color: #64ffda;">4. Industry Standard:</strong> This exact technique is used in production systems.</p>
+                    <div style="font-size: 0.85rem; color: #4a5568; line-height: 1.6;">
+                        <p><strong style="color: #1a365d;">1. Not Cherry-Picked:</strong> This data comes from actual sources, not carefully crafted to make the filter look good.</p>
+                        <p style="margin-top: 8px;"><strong style="color: #1a365d;">2. Real Noise Patterns:</strong> Financial/sensor data has complex noise - not simple Gaussian.</p>
+                        <p style="margin-top: 8px;"><strong style="color: #1a365d;">3. Verifiable:</strong> You can check the source data yourself.</p>
+                        <p style="margin-top: 8px;"><strong style="color: #1a365d;">4. Industry Standard:</strong> This exact technique is used in production systems.</p>
                     </div>
                 </div>
             </div>
@@ -1129,60 +1129,60 @@
         <div class="explanation-section">
             <h2>📚 What is the Kalman Filter?</h2>
             
-            <p style="color: #a8b2d1; line-height: 1.8; margin-bottom: 20px;">
-                The <strong style="color: #64ffda;">Kalman Filter</strong> is a smart way to estimate the TRUE value from NOISY measurements. 
+            <p style="color: #4a5568; line-height: 1.8; margin-bottom: 20px;">
+                The <strong style="color: #1a365d;">Kalman Filter</strong> is a smart way to estimate the TRUE value from NOISY measurements. 
                 Think of it as a "best guess" algorithm that gets better over time by learning from data.
             </p>
 
             <!-- PROBABILITY CONNECTION -->
-            <div style="background: rgba(255, 200, 100, 0.1); border: 2px solid #f59e0b; border-radius: 12px; padding: 20px; margin: 20px 0;">
-                <h3 style="color: #f59e0b; margin-bottom: 15px;">🎲 How Does This Relate to Probability?</h3>
+            <div style="background: #fffbeb; border: 2px solid #d69e2e; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <h3 style="color: #975a16; margin-bottom: 15px;">🎲 How Does This Relate to Probability?</h3>
                 
-                <p style="color: #c9d1d9; line-height: 1.8; margin-bottom: 15px;">
+                <p style="color: #4a5568; line-height: 1.8; margin-bottom: 15px;">
                     The Kalman Filter is <strong>ALL about probability!</strong> Here's the key insight:
                 </p>
                 
-                <div style="background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px; margin: 15px 0;">
+                <div style="background: #fef3c7; border-radius: 10px; padding: 20px; margin: 15px 0;">
                     <div style="text-align: center; margin-bottom: 15px;">
                         <span style="font-size: 1.5rem;">🎯 True Value</span>
-                        <span style="font-size: 1.5rem; color: #64ffda; margin: 0 10px;">=</span>
+                        <span style="font-size: 1.5rem; color: #1a365d; margin: 0 10px;">=</span>
                         <span style="font-size: 1.5rem;">📏 Measurement</span>
-                        <span style="font-size: 1.5rem; color: #64ffda; margin: 0 10px;">+</span>
-                        <span style="font-size: 1.5rem; color: #ff6b6b;">🎲 Random Noise</span>
+                        <span style="font-size: 1.5rem; color: #1a365d; margin: 0 10px;">+</span>
+                        <span style="font-size: 1.5rem; color: #c53030;">🎲 Random Noise</span>
                     </div>
-                    <p style="text-align: center; color: #8892b0; font-size: 0.9rem;">
+                    <p style="text-align: center; color: #744210; font-size: 0.9rem;">
                         Every measurement has random error - the Kalman Filter removes it!
                     </p>
                 </div>
 
                 <div class="step-grid" style="margin-top: 20px;">
-                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #64ffda;">📊 Gaussian Distribution</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem; margin-top: 8px;">
+                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
+                        <h4 style="color: #1a365d;">📊 Gaussian Distribution</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
                             The filter assumes measurements follow a <strong>Normal (Gaussian) distribution</strong>. 
                             Most measurements cluster around the true value, with fewer far away.
                         </p>
                     </div>
                     
-                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #64ffda;">📈 Variance = Uncertainty</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem; margin-top: 8px;">
+                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
+                        <h4 style="color: #1a365d;">📈 Variance = Uncertainty</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
                             <strong>Variance (σ²)</strong> measures how spread out the data is. 
                             High variance = high uncertainty. The filter reduces variance!
                         </p>
                     </div>
                     
-                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #64ffda;">⚖️ Weighted Average</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem; margin-top: 8px;">
+                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
+                        <h4 style="color: #1a365d;">⚖️ Weighted Average</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
                             The filter combines prediction + measurement using a <strong>weighted average</strong>. 
                             More reliable source gets more weight!
                         </p>
                     </div>
                     
-                    <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
-                        <h4 style="color: #64ffda;">🔄 Bayes' Theorem</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem; margin-top: 8px;">
+                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
+                        <h4 style="color: #1a365d;">🔄 Bayes' Theorem</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
                             Kalman Filter is actually <strong>recursive Bayesian estimation</strong>! 
                             It updates beliefs based on new evidence (measurements).
                         </p>
@@ -1191,56 +1191,56 @@
             </div>
 
             <!-- SIMPLE MATH -->
-            <h3 style="color: #c9d1d9; margin: 25px 0 15px;">🔢 The Simple Math (Just 3 Steps!)</h3>
+            <h3 style="color: #1a365d; margin: 25px 0 15px;">🔢 The Simple Math (Just 3 Steps!)</h3>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                 
                 <!-- Step 1 -->
-                <div class="equation-box" style="border-left: 4px solid #64ffda;">
+                <div class="equation-box" style="border-left: 4px solid #276749;">
                     <div class="equation-label">STEP 1: Calculate the "Trust Factor"</div>
                     <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
-                        K = <span style="color: #64ffda;">P</span> / (<span style="color: #64ffda;">P</span> + <span style="color: #ff6b6b;">R</span>)
+                        K = <span style="color: #276749;">P</span> / (<span style="color: #276749;">P</span> + <span style="color: #c53030;">R</span>)
                     </div>
-                    <div style="font-size: 0.9rem; color: #a8b2d1; line-height: 1.6;">
+                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
                         <strong>K</strong> = Kalman Gain (how much to trust measurement)<br>
-                        <span style="color: #64ffda;"><strong>P</strong></span> = Our current uncertainty<br>
-                        <span style="color: #ff6b6b;"><strong>R</strong></span> = Measurement noise (sensor error)
+                        <span style="color: #276749;"><strong>P</strong></span> = Our current uncertainty<br>
+                        <span style="color: #c53030;"><strong>R</strong></span> = Measurement noise (sensor error)
                     </div>
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(100,255,218,0.1); border-radius: 6px; font-size: 0.85rem;">
+                    <div style="margin-top: 10px; padding: 10px; background: #f0fff4; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
                         💡 <strong>Example:</strong> If P=5 and R=10, then K = 5/(5+10) = <strong>0.33</strong><br>
                         This means we trust the measurement 33%
                     </div>
                 </div>
                 
                 <!-- Step 2 -->
-                <div class="equation-box" style="border-left: 4px solid #f59e0b;">
+                <div class="equation-box" style="border-left: 4px solid #d69e2e;">
                     <div class="equation-label">STEP 2: Update Our Estimate</div>
                     <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
                         New = Old + K × (Measurement - Old)
                     </div>
-                    <div style="font-size: 0.9rem; color: #a8b2d1; line-height: 1.6;">
+                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
                         This is just a <strong>weighted average</strong>!<br>
                         We move from our old estimate toward the measurement.<br>
                         K controls how far we move.
                     </div>
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(245,158,11,0.1); border-radius: 6px; font-size: 0.85rem;">
+                    <div style="margin-top: 10px; padding: 10px; background: #fffbeb; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
                         💡 <strong>Example:</strong> Old=100, Measurement=110, K=0.33<br>
                         New = 100 + 0.33 × (110-100) = 100 + 3.3 = <strong>103.3</strong>
                     </div>
                 </div>
                 
                 <!-- Step 3 -->
-                <div class="equation-box" style="border-left: 4px solid #ff6b6b;">
+                <div class="equation-box" style="border-left: 4px solid #c53030;">
                     <div class="equation-label">STEP 3: Update Uncertainty</div>
                     <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
                         P<sub>new</sub> = (1 - K) × P<sub>old</sub>
                     </div>
-                    <div style="font-size: 0.9rem; color: #a8b2d1; line-height: 1.6;">
+                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
                         After using a measurement, we're more confident!<br>
                         Our uncertainty <strong>decreases</strong>.<br>
                         The more measurements, the more accurate.
                     </div>
-                    <div style="margin-top: 10px; padding: 10px; background: rgba(255,107,107,0.1); border-radius: 6px; font-size: 0.85rem;">
+                    <div style="margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
                         💡 <strong>Example:</strong> P=5, K=0.33<br>
                         P<sub>new</sub> = (1-0.33) × 5 = 0.67 × 5 = <strong>3.35</strong><br>
                         Uncertainty dropped from 5 to 3.35! 🎉
@@ -1249,15 +1249,15 @@
             </div>
 
             <!-- INTUITIVE EXPLANATION -->
-            <h3 style="color: #c9d1d9; margin: 30px 0 15px;">🧠 The Intuition (No Math Needed!)</h3>
+            <h3 style="color: #1a365d; margin: 30px 0 15px;">🧠 The Intuition (No Math Needed!)</h3>
             
-            <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 25px;">
+            <div style="background: #f7fafc; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                     
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
-                        <h4 style="color: #64ffda; margin-bottom: 10px;">It's Like Averaging</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem;">
+                        <h4 style="color: #1a365d; margin-bottom: 10px;">It's Like Averaging</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem;">
                             Imagine you're trying to guess someone's height. You take multiple measurements with a noisy ruler. 
                             <strong>Averaging</strong> all measurements gives a better estimate than any single one. 
                             Kalman Filter does this, but <em>smarter</em>!
@@ -1266,8 +1266,8 @@
                     
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">⚖️</div>
-                        <h4 style="color: #64ffda; margin-bottom: 10px;">Trust the Best Source</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem;">
+                        <h4 style="color: #1a365d; margin-bottom: 10px;">Trust the Best Source</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem;">
                             If your friend is good at estimating, trust them more. If the ruler is accurate, trust it more. 
                             <strong>Kalman Gain (K)</strong> automatically figures out who to trust based on 
                             how noisy each source is.
@@ -1276,8 +1276,8 @@
                     
                     <div style="text-align: center; padding: 20px;">
                         <div style="font-size: 3rem; margin-bottom: 10px;">📈</div>
-                        <h4 style="color: #64ffda; margin-bottom: 10px;">Gets Better Over Time</h4>
-                        <p style="color: #a8b2d1; font-size: 0.9rem;">
+                        <h4 style="color: #1a365d; margin-bottom: 10px;">Gets Better Over Time</h4>
+                        <p style="color: #4a5568; font-size: 0.9rem;">
                             Each new measurement makes the filter more confident. It's like how your estimate of a friend's 
                             arrival time gets better as you get more updates. <strong>More data = less uncertainty!</strong>
                         </p>
@@ -1286,50 +1286,50 @@
             </div>
 
             <!-- PROBABILITY SUMMARY -->
-            <h3 style="color: #c9d1d9; margin: 30px 0 15px;">📊 Probability Concepts Used</h3>
+            <h3 style="color: #1a365d; margin: 30px 0 15px;">📊 Probability Concepts Used</h3>
             
             <div class="variable-explain">
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #64ffda;">Mean (μ)</div>
+                    <div class="var-symbol" style="color: #276749;">Mean (μ)</div>
                     <div class="var-desc">The state estimate x̂ is the expected value (mean) of our belief</div>
                 </div>
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #f59e0b;">Variance (σ²)</div>
+                    <div class="var-symbol" style="color: #d69e2e;">Variance (σ²)</div>
                     <div class="var-desc">P represents variance - how spread out our uncertainty is</div>
                 </div>
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #ff6b6b;">Normal Distribution</div>
+                    <div class="var-symbol" style="color: #c53030;">Normal Distribution</div>
                     <div class="var-desc">We assume errors follow a bell curve (Gaussian)</div>
                 </div>
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #64ffda;">Conditional Probability</div>
+                    <div class="var-symbol" style="color: #276749;">Conditional Probability</div>
                     <div class="var-desc">P(true state | measurements) - what we're computing!</div>
                 </div>
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #f59e0b;">Bayes' Theorem</div>
+                    <div class="var-symbol" style="color: #d69e2e;">Bayes' Theorem</div>
                     <div class="var-desc">Update beliefs: P(A|B) = P(B|A) × P(A) / P(B)</div>
                 </div>
                 <div class="var-item">
-                    <div class="var-symbol" style="color: #ff6b6b;">Expected Value</div>
+                    <div class="var-symbol" style="color: #c53030;">Expected Value</div>
                     <div class="var-desc">The weighted average formula is an expected value calculation</div>
                 </div>
             </div>
 
             <!-- REAL WORLD ANALOGY -->
-            <div style="background: linear-gradient(135deg, rgba(100,255,218,0.1), rgba(255,107,107,0.1)); border-radius: 12px; padding: 25px; margin-top: 25px;">
-                <h3 style="color: #c9d1d9; margin-bottom: 15px;">🌍 Real-World Analogy: GPS Navigation</h3>
+            <div style="background: linear-gradient(135deg, #f0fff4, #fff5f5); border-radius: 12px; padding: 25px; margin-top: 25px; border: 1px solid #e2e8f0;">
+                <h3 style="color: #1a365d; margin-bottom: 15px;">🌍 Real-World Analogy: GPS Navigation</h3>
                 <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
                     <div style="font-size: 4rem;">📱</div>
                     <div style="flex: 1; min-width: 250px;">
-                        <p style="color: #a8b2d1; line-height: 1.8;">
+                        <p style="color: #4a5568; line-height: 1.8;">
                             Your phone's GPS uses Kalman Filter! Here's how:
                         </p>
-                        <ul style="color: #a8b2d1; margin-top: 10px; line-height: 1.8;">
-                            <li><strong style="color: #64ffda;">Prediction:</strong> "Based on my speed, I should be HERE"</li>
-                            <li><strong style="color: #ff6b6b;">Measurement:</strong> "Satellite says I'm THERE (but noisy!)"</li>
-                            <li><strong style="color: #f59e0b;">Kalman Filter:</strong> "The truth is probably somewhere in between"</li>
+                        <ul style="color: #4a5568; margin-top: 10px; line-height: 1.8;">
+                            <li><strong style="color: #276749;">Prediction:</strong> "Based on my speed, I should be HERE"</li>
+                            <li><strong style="color: #c53030;">Measurement:</strong> "Satellite says I'm THERE (but noisy!)"</li>
+                            <li><strong style="color: #d69e2e;">Kalman Filter:</strong> "The truth is probably somewhere in between"</li>
                         </ul>
-                        <p style="color: #8892b0; margin-top: 10px; font-size: 0.9rem;">
+                        <p style="color: #718096; margin-top: 10px; font-size: 0.9rem;">
                             That's why your GPS dot moves smoothly instead of jumping around! 🎯
                         </p>
                     </div>
@@ -1342,7 +1342,7 @@
         <!-- ============================================================ -->
         <div class="calculator-section">
             <h2>🧮 Kalman Filter Calculator</h2>
-            <p style="color: #a8b2d1; margin-bottom: 20px;">
+            <p style="color: #4a5568; margin-bottom: 20px;">
                 Try calculating one step of the Kalman filter yourself! Enter the values below and click "Calculate" to see the step-by-step computation.
             </p>
             
@@ -1410,7 +1410,7 @@
                         </div>
                     </div>
                     
-                    <div style="margin-top: 15px; padding: 15px; background: rgba(100, 255, 218, 0.1); border-radius: 8px;">
+                    <div style="margin-top: 15px; padding: 15px; background: #f0fff4; border-radius: 8px; border: 1px solid #9ae6b4;">
                         <div class="result-row">
                             <span class="result-label">New State Estimate (x̂<sub>k</sub>)</span>
                             <span class="result-value" id="calcResultX">101.67</span>
@@ -1425,7 +1425,7 @@
                         </div>
                     </div>
                     
-                    <div style="margin-top: 15px; font-size: 0.85rem; color: #8892b0;">
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: #718096;">
                         💡 <strong>Interpretation:</strong> <span id="calcInterpretation">With K=0.333, the filter trusts the measurement 33% and the prediction 67%.</span>
                     </div>
                 </div>
