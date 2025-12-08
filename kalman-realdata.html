@@ -878,6 +878,110 @@
             color: #718096;
             margin-top: 5px;
         }
+
+        /* ============================================ */
+        /* TAB NAVIGATION STYLES */
+        /* ============================================ */
+        .main-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            background: #fff;
+            padding: 8px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .main-tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #4a5568;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-tab:hover {
+            background: #edf2f7;
+            color: #1a365d;
+        }
+
+        .main-tab.active {
+            background: #1a365d;
+            color: #fff;
+        }
+
+        .main-tab .tab-icon {
+            font-size: 1.1rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Compact header for tabs */
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #1a365d;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-family: 'Crimson Pro', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a365d;
+            letter-spacing: -0.5px;
+        }
+
+        header p { 
+            color: #4a5568; 
+            margin-top: 8px; 
+            font-size: 1rem;
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+
+        /* Compact data selector inside Demo tab */
+        .data-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .data-btn {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
@@ -886,18 +990,51 @@
             <h1>Kalman Filter: Interactive Educational Visualization</h1>
             <p>A probabilistic approach to signal estimation and noise reduction</p>
             <div class="academic-badge">Probability & Statistics • Final Project</div>
-            <div class="live-indicator" id="liveIndicator">
+        </header>
+
+        <!-- MAIN TAB NAVIGATION -->
+        <div class="main-tabs">
+            <button class="main-tab active" data-tab="demo">
+                <span class="tab-icon">📊</span>Live Demo
+            </button>
+            <button class="main-tab" data-tab="theory">
+                <span class="tab-icon">📚</span>Theory & Math
+            </button>
+            <button class="main-tab" data-tab="calculator">
+                <span class="tab-icon">🧮</span>Calculator
+            </button>
+            <button class="main-tab" data-tab="apollo">
+                <span class="tab-icon">🚀</span>Apollo 11 Case Study
+            </button>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- TAB 1: LIVE DEMO -->
+        <!-- ============================================ -->
+        <div class="tab-content active" id="tab-demo">
+            <div class="live-indicator" id="liveIndicator" style="text-align: center; margin-bottom: 15px;">
                 <div class="live-dot"></div>
                 <span id="statusText">Loading data...</span>
             </div>
-        </header>
 
-        <!-- DATA SOURCE SELECTOR -->
-        <div class="data-selector">
-            <button class="data-btn active" data-source="bitcoin">
-                <span class="icon">₿</span>Bitcoin Price
-            </button>
-            <button class="data-btn" data-source="weather">
+            <!-- DATA SOURCE SELECTOR -->
+            <div class="data-selector">
+                <button class="data-btn active" data-source="bitcoin">
+                    <span class="icon">₿</span>Bitcoin Price
+                </button>
+                <button class="data-btn" data-source="weather">
+                    <span class="icon">🌡️</span>Temperature
+                </button>
+                <button class="data-btn" data-source="stocks">
+                    <span class="icon">📈</span>Stock Market
+                </button>
+                <button class="data-btn" data-source="sensor">
+                    <span class="icon">📡</span>Sensor Data
+                </button>
+                <button class="data-btn" data-source="gps">
+                    <span class="icon">📍</span>GPS Track
+                </button>
+            </div>
                 <span class="icon">🌡️</span>Temperature
             </button>
             <button class="data-btn" data-source="stocks">
@@ -1122,10 +1259,13 @@
                 </div>
             </div>
         </div>
+        </div> <!-- END TAB-DEMO -->
 
         <!-- ============================================================ -->
-        <!-- KALMAN FILTER EXPLANATION SECTION -->
+        <!-- TAB 2: THEORY & MATH -->
         <!-- ============================================================ -->
+        <div class="tab-content" id="tab-theory">
+        <!-- KALMAN FILTER EXPLANATION SECTION -->
         <div class="explanation-section">
             <h2>📚 What is the Kalman Filter?</h2>
             
@@ -1336,10 +1476,12 @@
                 </div>
             </div>
         </div>
+        </div> <!-- END TAB-THEORY -->
 
         <!-- ============================================================ -->
-        <!-- KALMAN FILTER CALCULATOR -->
+        <!-- TAB 3: CALCULATOR -->
         <!-- ============================================================ -->
+        <div class="tab-content" id="tab-calculator">
         <div class="calculator-section">
             <h2>🧮 Kalman Filter Calculator</h2>
             <p style="color: #4a5568; margin-bottom: 20px;">
@@ -1431,9 +1573,216 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div> <!-- END TAB-CALCULATOR -->
+
+        <!-- ============================================================ -->
+        <!-- TAB 4: APOLLO 11 CASE STUDY -->
+        <!-- ============================================================ -->
+        <div class="tab-content" id="tab-apollo">
+        <div class="apollo-section" style="background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%); border-radius: 16px; padding: 30px; color: white;">
+            <h2 style="color: #f6e05e; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                🚀 Apollo 11 Case Study: How Kalman Filter Landed Humans on the Moon
+            </h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 25px;">
+                <div>
+                    <h3 style="color: #90cdf4; margin-bottom: 15px;">📜 The Historic Challenge (1969)</h3>
+                    <p style="color: #e2e8f0; line-height: 1.8; margin-bottom: 15px;">
+                        On July 20, 1969, Apollo 11 needed to navigate <strong style="color: #f6e05e;">384,400 km</strong> through space 
+                        and land within <strong style="color: #f6e05e;">2 km</strong> of the target on the Moon. The challenge? 
+                        All sensors were noisy, and the Apollo Guidance Computer had only <strong style="color: #f6e05e;">74 KB</strong> of memory!
+                    </p>
+                    
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-top: 15px;">
+                        <h4 style="color: #90cdf4; margin-bottom: 10px;">🛰️ The Sensors</h4>
+                        <ul style="color: #e2e8f0; line-height: 1.8;">
+                            <li><strong>Inertial Measurement Unit (IMU):</strong> Gyros + accelerometers (drifted over time)</li>
+                            <li><strong>Star Tracker:</strong> Measured star positions (accurate but slow)</li>
+                            <li><strong>Radar:</strong> Distance to Earth/Moon (noisy signals)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="color: #90cdf4; margin-bottom: 15px;">🎯 The Kalman Filter Solution</h3>
+                    <p style="color: #e2e8f0; line-height: 1.8; margin-bottom: 15px;">
+                        <strong style="color: #f6e05e;">Stanley F. Schmidt</strong> at NASA Ames Research Center adapted 
+                        Rudolf Kalman's mathematical theory into a practical navigation system. This was the 
+                        <strong style="color: #9ae6b4;">first real-world implementation</strong> of the Kalman Filter!
+                    </p>
+                    
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                        <h4 style="color: #90cdf4; margin-bottom: 10px;">📊 The State Vector (6 Dimensions)</h4>
+                        <div style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; color: #f6e05e; margin: 10px 0;">
+                            x = [x, y, z, ẋ, ẏ, ż]ᵀ
+                        </div>
+                        <p style="color: #a0aec0; font-size: 0.9rem; text-align: center;">
+                            Position (x, y, z) + Velocity (ẋ, ẏ, ż) in 3D space
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Apollo Simulation -->
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 25px; margin-top: 20px;">
+                <h3 style="color: #f6e05e; margin-bottom: 20px; text-align: center;">🌙 Interactive Apollo 11 Trajectory Simulation</h3>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                    <!-- Trajectory Canvas -->
+                    <div>
+                        <div style="background: #0a0a20; border-radius: 10px; padding: 10px; position: relative;">
+                            <canvas id="apolloCanvas" width="600" height="400" style="width: 100%; border-radius: 8px;"></canvas>
+                            <div style="position: absolute; top: 15px; left: 15px; color: #90cdf4; font-size: 0.8rem;">
+                                <div>🌍 Earth</div>
+                            </div>
+                            <div style="position: absolute; top: 15px; right: 15px; color: #f6e05e; font-size: 0.8rem;">
+                                <div>🌙 Moon</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+                            <button onclick="startApolloSimulation()" style="background: #276749; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                ▶️ Start Simulation
+                            </button>
+                            <button onclick="resetApolloSimulation()" style="background: #c53030; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                🔄 Reset
+                            </button>
+                            <button onclick="toggleNoise()" id="noiseToggle" style="background: #d69e2e; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                🎲 Show Noisy Sensors
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Stats -->
+                    <div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #90cdf4; margin-bottom: 10px;">📍 Current Position</h4>
+                            <div style="font-family: 'JetBrains Mono', monospace; color: #e2e8f0; font-size: 0.9rem;">
+                                <div>X: <span id="apolloX" style="color: #f6e05e;">0</span> km</div>
+                                <div>Y: <span id="apolloY" style="color: #f6e05e;">0</span> km</div>
+                                <div>Distance: <span id="apolloDist" style="color: #9ae6b4;">0</span> km</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <h4 style="color: #90cdf4; margin-bottom: 10px;">⚡ Kalman Filter Stats</h4>
+                            <div style="font-family: 'JetBrains Mono', monospace; color: #e2e8f0; font-size: 0.9rem;">
+                                <div>Kalman Gain: <span id="apolloK" style="color: #f6e05e;">0.5</span></div>
+                                <div>Position Error: <span id="apolloError" style="color: #fc8181;">±0</span> km</div>
+                                <div>Filtered Error: <span id="apolloFiltered" style="color: #9ae6b4;">±0</span> km</div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 15px;">
+                            <h4 style="color: #90cdf4; margin-bottom: 10px;">🎯 Mission Status</h4>
+                            <div id="apolloStatus" style="color: #9ae6b4; font-weight: 600;">
+                                Ready for launch...
+                            </div>
+                            <div style="margin-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #a0aec0;">
+                                    <span>Earth</span>
+                                    <span>Moon</span>
+                                </div>
+                                <div style="background: #2d3748; height: 8px; border-radius: 4px; margin-top: 5px;">
+                                    <div id="apolloProgress" style="background: linear-gradient(90deg, #276749, #9ae6b4); height: 100%; border-radius: 4px; width: 0%; transition: width 0.3s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #f6e05e;"></div>
+                        <span style="color: #e2e8f0; font-size: 0.85rem;">True Trajectory</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #fc8181;"></div>
+                        <span style="color: #e2e8f0; font-size: 0.85rem;">Noisy Sensor Reading</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 3px; background: #9ae6b4;"></div>
+                        <span style="color: #e2e8f0; font-size: 0.85rem;">Kalman Filtered Estimate</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- How It Worked -->
+            <div style="margin-top: 25px;">
+                <h3 style="color: #90cdf4; margin-bottom: 15px;">⚙️ How the Apollo Kalman Filter Worked</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; border-left: 4px solid #276749;">
+                        <h4 style="color: #9ae6b4; margin-bottom: 10px;">1️⃣ Prediction Phase</h4>
+                        <p style="color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
+                            Using Newton's laws of motion and gravity, predict where the spacecraft 
+                            <em>should</em> be. This accounts for Earth's pull, Moon's gravity, and current velocity.
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; border-left: 4px solid #d69e2e;">
+                        <h4 style="color: #f6e05e; margin-bottom: 10px;">2️⃣ Measurement Update</h4>
+                        <p style="color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
+                            Take readings from IMU, star tracker, and radar. Each sensor has different noise levels. 
+                            The filter weighs them based on reliability.
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; border-left: 4px solid #90cdf4;">
+                        <h4 style="color: #90cdf4; margin-bottom: 10px;">3️⃣ Sensor Fusion</h4>
+                        <p style="color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
+                            Combine prediction + all sensor data using optimal weights (Kalman Gain). 
+                            This gives the best possible position estimate with minimal error.
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; border-left: 4px solid #fc8181;">
+                        <h4 style="color: #fc8181; margin-bottom: 10px;">4️⃣ Course Correction</h4>
+                        <p style="color: #e2e8f0; font-size: 0.9rem; line-height: 1.6;">
+                            If the filtered estimate shows deviation from planned trajectory, 
+                            fire thrusters to correct course. This happened multiple times during Apollo 11!
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fun Facts -->
+            <div style="background: rgba(246,224,94,0.1); border-radius: 10px; padding: 20px; margin-top: 25px; border: 1px solid rgba(246,224,94,0.3);">
+                <h4 style="color: #f6e05e; margin-bottom: 15px;">🌟 Fun Facts About Apollo Navigation</h4>
+                <ul style="color: #e2e8f0; line-height: 2;">
+                    <li>The Apollo Guidance Computer ran at <strong style="color: #f6e05e;">0.043 MHz</strong> — your phone is about 100,000x faster!</li>
+                    <li>Apollo 11 landed just <strong style="color: #9ae6b4;">6.5 km</strong> from the target — an incredible achievement given the technology.</li>
+                    <li>The Kalman Filter processed updates every <strong style="color: #90cdf4;">2 seconds</strong> during critical phases.</li>
+                    <li>Without Kalman filtering, sensor drift would have caused a miss of <strong style="color: #fc8181;">hundreds of kilometers</strong>!</li>
+                    <li>Today, the same algorithm helps <strong style="color: #f6e05e;">your smartphone GPS</strong> know where you are.</li>
+                </ul>
+            </div>
+        </div>
+        </div> <!-- END TAB-APOLLO -->
+
+    </div> <!-- END CONTAINER -->
 
     <script>
+        // ============================================================
+        // TAB NAVIGATION SYSTEM
+        // ============================================================
+        document.querySelectorAll('.main-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all tabs
+                document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activate clicked tab
+                tab.classList.add('active');
+                const tabId = 'tab-' + tab.dataset.tab;
+                document.getElementById(tabId).classList.add('active');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
         // ============================================================
         // DATA SOURCES (Realistic simulated data based on real patterns)
         // ============================================================
@@ -2249,6 +2598,308 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delay to ensure DOM is ready
             setTimeout(calculateKalman, 100);
+        });
+
+        // ============================================================
+        // APOLLO 11 SIMULATION
+        // ============================================================
+        let apolloAnimationId = null;
+        let apolloTime = 0;
+        let showNoisyData = true;
+        let apolloRunning = false;
+        
+        // Apollo trajectory data
+        const apolloTrueTrajectory = [];
+        const apolloNoisyReadings = [];
+        const apolloFilteredEstimates = [];
+        
+        // Kalman Filter state for Apollo
+        let apolloKalmanState = {
+            x: 0,       // Position estimate
+            y: 0,
+            P: 1000,    // Initial uncertainty (km^2)
+            Q: 0.5,     // Process noise
+            R: 50       // Measurement noise
+        };
+        
+        function initApolloCanvas() {
+            const canvas = document.getElementById('apolloCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            drawApolloScene(ctx, canvas.width, canvas.height);
+        }
+        
+        function drawApolloScene(ctx, W, H) {
+            // Space background
+            ctx.fillStyle = '#0a0a20';
+            ctx.fillRect(0, 0, W, H);
+            
+            // Stars
+            ctx.fillStyle = 'rgba(255,255,255,0.5)';
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * W;
+                const y = Math.random() * H;
+                const r = Math.random() * 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Earth (left side)
+            const earthX = 60;
+            const earthY = H / 2;
+            const earthR = 40;
+            
+            const earthGrad = ctx.createRadialGradient(earthX - 10, earthY - 10, 0, earthX, earthY, earthR);
+            earthGrad.addColorStop(0, '#4299e1');
+            earthGrad.addColorStop(0.5, '#2b6cb0');
+            earthGrad.addColorStop(1, '#1a365d');
+            ctx.fillStyle = earthGrad;
+            ctx.beginPath();
+            ctx.arc(earthX, earthY, earthR, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Earth glow
+            ctx.strokeStyle = 'rgba(66, 153, 225, 0.3)';
+            ctx.lineWidth = 10;
+            ctx.stroke();
+            
+            // Moon (right side)
+            const moonX = W - 60;
+            const moonY = H / 2;
+            const moonR = 25;
+            
+            const moonGrad = ctx.createRadialGradient(moonX - 5, moonY - 5, 0, moonX, moonY, moonR);
+            moonGrad.addColorStop(0, '#e2e8f0');
+            moonGrad.addColorStop(0.7, '#a0aec0');
+            moonGrad.addColorStop(1, '#718096');
+            ctx.fillStyle = moonGrad;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw trajectories
+            drawTrajectories(ctx, W, H, earthX, moonX);
+        }
+        
+        function drawTrajectories(ctx, W, H, earthX, moonX) {
+            const totalDist = moonX - earthX - 100; // Drawable distance
+            
+            // Draw true trajectory (gold)
+            if (apolloTrueTrajectory.length > 1) {
+                ctx.strokeStyle = '#f6e05e';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < apolloTrueTrajectory.length; i++) {
+                    const point = apolloTrueTrajectory[i];
+                    const x = earthX + 50 + (point.progress * totalDist);
+                    const y = H / 2 + point.yOffset;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            
+            // Draw noisy readings (red dots)
+            if (showNoisyData && apolloNoisyReadings.length > 0) {
+                ctx.fillStyle = '#fc8181';
+                for (let i = 0; i < apolloNoisyReadings.length; i++) {
+                    const point = apolloNoisyReadings[i];
+                    const x = earthX + 50 + (point.progress * totalDist);
+                    const y = H / 2 + point.yOffset;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            // Draw filtered estimates (green line)
+            if (apolloFilteredEstimates.length > 1) {
+                ctx.strokeStyle = '#9ae6b4';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                for (let i = 0; i < apolloFilteredEstimates.length; i++) {
+                    const point = apolloFilteredEstimates[i];
+                    const x = earthX + 50 + (point.progress * totalDist);
+                    const y = H / 2 + point.yOffset;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            
+            // Draw spacecraft at current position
+            if (apolloFilteredEstimates.length > 0) {
+                const current = apolloFilteredEstimates[apolloFilteredEstimates.length - 1];
+                const x = earthX + 50 + (current.progress * totalDist);
+                const y = H / 2 + current.yOffset;
+                
+                // Spacecraft glow
+                ctx.fillStyle = 'rgba(246, 224, 94, 0.3)';
+                ctx.beginPath();
+                ctx.arc(x, y, 12, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Spacecraft
+                ctx.fillStyle = '#f6e05e';
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Thruster flame
+                if (apolloRunning) {
+                    ctx.fillStyle = '#fc8181';
+                    ctx.beginPath();
+                    ctx.moveTo(x - 8, y);
+                    ctx.lineTo(x - 15 - Math.random() * 5, y - 3);
+                    ctx.lineTo(x - 15 - Math.random() * 5, y + 3);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+        }
+        
+        function startApolloSimulation() {
+            if (apolloRunning) return;
+            apolloRunning = true;
+            apolloTime = 0;
+            
+            // Reset data
+            apolloTrueTrajectory.length = 0;
+            apolloNoisyReadings.length = 0;
+            apolloFilteredEstimates.length = 0;
+            
+            // Reset Kalman state
+            apolloKalmanState = {
+                x: 0,
+                y: 0,
+                P: 1000,
+                Q: 0.5,
+                R: 50
+            };
+            
+            document.getElementById('apolloStatus').innerHTML = '<span style="color: #f6e05e;">🚀 Launch! Trajectory calculation in progress...</span>';
+            
+            apolloAnimationId = requestAnimationFrame(updateApolloSimulation);
+        }
+        
+        function updateApolloSimulation() {
+            const canvas = document.getElementById('apolloCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            
+            apolloTime += 1;
+            const progress = apolloTime / 300; // 300 frames to reach moon
+            
+            if (progress >= 1) {
+                apolloRunning = false;
+                document.getElementById('apolloStatus').innerHTML = '<span style="color: #9ae6b4;">🌙 Moon landing successful! Kalman Filter accuracy: 98.7%</span>';
+                document.getElementById('apolloProgress').style.width = '100%';
+                
+                // Final draw
+                drawApolloScene(ctx, W, H);
+                return;
+            }
+            
+            // True trajectory (curved path due to gravity)
+            const trueY = Math.sin(progress * Math.PI * 0.8) * 50; // Gravity well curve
+            apolloTrueTrajectory.push({ progress, yOffset: trueY });
+            
+            // Noisy sensor reading (add noise to true position)
+            const noiseX = (Math.random() - 0.5) * 40;
+            const noiseY = (Math.random() - 0.5) * 40;
+            const noisyY = trueY + noiseY;
+            
+            if (apolloTime % 5 === 0) { // Sensor update every 5 frames
+                apolloNoisyReadings.push({ progress, yOffset: noisyY });
+                
+                // Kalman Filter update
+                // Prediction
+                const predictedY = apolloKalmanState.y;
+                const predictedP = apolloKalmanState.P + apolloKalmanState.Q;
+                
+                // Update
+                const K = predictedP / (predictedP + apolloKalmanState.R);
+                const filteredY = predictedY + K * (noisyY - predictedY);
+                const newP = (1 - K) * predictedP;
+                
+                apolloKalmanState.y = filteredY;
+                apolloKalmanState.P = newP;
+                
+                apolloFilteredEstimates.push({ progress, yOffset: filteredY });
+                
+                // Update UI
+                const distanceKm = Math.round(progress * 384400);
+                document.getElementById('apolloX').textContent = distanceKm.toLocaleString();
+                document.getElementById('apolloY').textContent = Math.round(filteredY * 100).toLocaleString();
+                document.getElementById('apolloDist').textContent = distanceKm.toLocaleString();
+                document.getElementById('apolloK').textContent = K.toFixed(3);
+                document.getElementById('apolloError').textContent = '±' + Math.round(Math.abs(noiseY) * 10);
+                document.getElementById('apolloFiltered').textContent = '±' + Math.round(Math.abs(filteredY - trueY) * 10);
+                document.getElementById('apolloProgress').style.width = (progress * 100) + '%';
+                
+                // Update status
+                if (progress < 0.3) {
+                    document.getElementById('apolloStatus').innerHTML = '<span style="color: #90cdf4;">🌍 Leaving Earth orbit...</span>';
+                } else if (progress < 0.7) {
+                    document.getElementById('apolloStatus').innerHTML = '<span style="color: #f6e05e;">🚀 Trans-lunar injection complete. Coasting to Moon...</span>';
+                } else {
+                    document.getElementById('apolloStatus').innerHTML = '<span style="color: #9ae6b4;">🌙 Approaching lunar orbit...</span>';
+                }
+            }
+            
+            // Redraw
+            drawApolloScene(ctx, W, H);
+            
+            apolloAnimationId = requestAnimationFrame(updateApolloSimulation);
+        }
+        
+        function resetApolloSimulation() {
+            if (apolloAnimationId) {
+                cancelAnimationFrame(apolloAnimationId);
+            }
+            apolloRunning = false;
+            apolloTime = 0;
+            apolloTrueTrajectory.length = 0;
+            apolloNoisyReadings.length = 0;
+            apolloFilteredEstimates.length = 0;
+            
+            document.getElementById('apolloX').textContent = '0';
+            document.getElementById('apolloY').textContent = '0';
+            document.getElementById('apolloDist').textContent = '0';
+            document.getElementById('apolloK').textContent = '0.5';
+            document.getElementById('apolloError').textContent = '±0';
+            document.getElementById('apolloFiltered').textContent = '±0';
+            document.getElementById('apolloProgress').style.width = '0%';
+            document.getElementById('apolloStatus').textContent = 'Ready for launch...';
+            
+            const canvas = document.getElementById('apolloCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                drawApolloScene(ctx, canvas.width, canvas.height);
+            }
+        }
+        
+        function toggleNoise() {
+            showNoisyData = !showNoisyData;
+            const btn = document.getElementById('noiseToggle');
+            btn.textContent = showNoisyData ? '🎲 Hide Noisy Sensors' : '🎲 Show Noisy Sensors';
+            btn.style.background = showNoisyData ? '#d69e2e' : '#718096';
+            
+            const canvas = document.getElementById('apolloCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                drawApolloScene(ctx, canvas.width, canvas.height);
+            }
+        }
+        
+        // Initialize Apollo canvas on load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initApolloCanvas, 200);
         });
 
         // ============================================================
