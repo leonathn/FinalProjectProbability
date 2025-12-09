@@ -670,6 +670,71 @@ P<sub>new</sub> = (1 - K<sub>B</sub>H<sub>B</sub>)P<sub>A</sub>  <em>(final post
     </section>
 
     <section>
+        <h2>Understanding Sensor Noise Impact</h2>
+        
+        <h3>What Does High Noise Mean?</h3>
+        <p>
+            The noise parameters R<sub>A</sub> and R<sub>B</sub> represent the <strong>variance</strong> of the measurement error. 
+            High noise means the sensor readings have large random fluctuations around the true value.
+        </p>
+
+        <div class="parameters">
+            <h4>🔴 High Noise Scenario (R<sub>A</sub> = 10.0, R<sub>B</sub> = 8.0)</h4>
+            <p><strong>What Happens:</strong></p>
+            <ul>
+                <li><strong>Kalman Gain Decreases:</strong> K = P/(P + R) → When R is large, K becomes very small (close to 0)</li>
+                <li><strong>Filter Trusts Sensors Less:</strong> The filter gives more weight to its prediction than to noisy measurements</li>
+                <li><strong>Slower Convergence:</strong> It takes more time steps for the estimate to reach the true value</li>
+                <li><strong>Smoother but Delayed:</strong> The output is very smooth but may lag behind actual temperature changes</li>
+            </ul>
+            <p><strong>Mathematical Impact:</strong> With high R, the Kalman Gain K ≈ 0, so the update equation becomes:</p>
+            <div class="equation">
+x̂<sub>new</sub> ≈ x̂<sub>pred</sub> + 0 × (z - Hx̂<sub>pred</sub>) ≈ x̂<sub>pred</sub>
+            </div>
+            <p>This means the filter <em>ignores</em> the measurements and just uses its prediction!</p>
+        </div>
+
+        <div class="parameters">
+            <h4>🟢 Low Noise Scenario (R<sub>A</sub> = 0.1, R<sub>B</sub> = 0.05)</h4>
+            <p><strong>What Happens:</strong></p>
+            <ul>
+                <li><strong>Kalman Gain Increases:</strong> K = P/(P + R) → When R is small, K approaches 1</li>
+                <li><strong>Filter Trusts Sensors More:</strong> The filter heavily weights the actual measurements</li>
+                <li><strong>Fast Convergence:</strong> Estimate quickly adjusts to match sensor readings</li>
+                <li><strong>More Responsive:</strong> Tracks changes rapidly but may show slight fluctuations</li>
+            </ul>
+            <p><strong>Mathematical Impact:</strong> With low R, the Kalman Gain K ≈ 1, so:</p>
+            <div class="equation">
+x̂<sub>new</sub> ≈ x̂<sub>pred</sub> + 1 × (z - Hx̂<sub>pred</sub>) ≈ z
+            </div>
+            <p>The filter <em>directly uses</em> the measurements!</p>
+        </div>
+
+        <div class="parameters">
+            <h4>⚖️ Balanced Noise (Our Setup: R<sub>A</sub> = 2.0, R<sub>B</sub> = 0.5)</h4>
+            <p><strong>Optimal Trade-off:</strong></p>
+            <ul>
+                <li><strong>Sensor A:</strong> Higher noise (R<sub>A</sub> = 2.0) → Lower weight → K<sub>A</sub> smaller</li>
+                <li><strong>Sensor B:</strong> Lower noise (R<sub>B</sub> = 0.5) → Higher weight → K<sub>B</sub> larger</li>
+                <li><strong>Complementary Fusion:</strong> Filter automatically gives more trust to the stable Sensor B</li>
+                <li><strong>Best of Both:</strong> Combines Sensor A's proximity advantage with Sensor B's stability</li>
+            </ul>
+            <p><strong>Key Insight:</strong> The Kalman Filter is <em>self-tuning</em> — it automatically adjusts how much to trust each sensor based on their noise levels!</p>
+        </div>
+
+        <h3>Why This Matters for Our Application</h3>
+        <p>
+            In the building environment experiment:
+        </p>
+        <ul>
+            <li><strong>Physical Reality:</strong> Sensor A (close to bulb) experiences more turbulence and thermal convection → higher R<sub>A</sub></li>
+            <li><strong>Stability Trade-off:</strong> Sensor B (far from bulb) is more stable but has weaker signal → lower R<sub>B</sub></li>
+            <li><strong>Optimal Estimation:</strong> Kalman Filter weighs both sensors according to their reliability, achieving better accuracy than either sensor alone</li>
+            <li><strong>Uncertainty Quantification:</strong> The variance P tells us how confident the estimate is — crucial for CFD model validation</li>
+        </ul>
+    </section>
+
+    <section>
         <h2>Interactive Simulation Tool</h2>
         <p>
             Try the Kalman Filter with your own parameters or simulate custom sensor data:
