@@ -319,15 +319,29 @@
             const sensorB = [];
             const kfEstimate = [];
 
-            // Kalman Filter initialization
-            let x_hat = trueBulb;
-            let P = 10.0;
+            // Kalman Filter initialization - start with uncertain initial guess
+            let x_hat = trueBulb * 0.5; // Start with underestimate
+            let P = 100.0; // High initial uncertainty
+
+            // Add some random variation to the true bulb temperature over time
+            const trueBulbVariation = [];
+            for (let i = 0; i < steps; i++) {
+                // Add small random walk to simulate temperature fluctuations
+                const variation = trueBulb + Math.sin(i / 10) * 5 + (Math.random() - 0.5) * 3;
+                trueBulbVariation.push(variation);
+            }
 
             // Generate synthetic data and run KF
             for (let i = 0; i < steps; i++) {
-                // Simulate sensor readings with noise
-                const zA = HA * trueBulb + (Math.random() - 0.5) * 2 * Math.sqrt(RA);
-                const zB = HB * trueBulb + (Math.random() - 0.5) * 2 * Math.sqrt(RB);
+                const currentTrueBulb = trueBulbVariation[i];
+                
+                // Simulate sensor readings with Gaussian noise
+                // Using Box-Muller transform for proper Gaussian noise
+                const gaussianA = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+                const gaussianB = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+                
+                const zA = HA * currentTrueBulb + gaussianA * Math.sqrt(RA);
+                const zB = HB * currentTrueBulb + gaussianB * Math.sqrt(RB);
 
                 sensorA.push(zA);
                 sensorB.push(zB);
@@ -337,12 +351,12 @@
                 const P_pred = P + Q;
 
                 // Update with Sensor A
-                const KA = P_pred * HA / (HA * HA * P_pred + RA);
+                const KA = (P_pred * HA) / (HA * HA * P_pred + RA);
                 const x_A = x_pred + KA * (zA - HA * x_pred);
                 const P_A = (1 - KA * HA) * P_pred;
 
                 // Update with Sensor B
-                const KB = P_A * HB / (HB * HB * P_A + RB);
+                const KB = (P_A * HB) / (HB * HB * P_A + RB);
                 x_hat = x_A + KB * (zB - HB * x_A);
                 P = (1 - KB * HB) * P_A;
 
@@ -358,17 +372,21 @@
             const stdB = Math.sqrt(sensorB.reduce((sum, val) => sum + (val - avgB) ** 2, 0) / sensorB.length);
             const stdKF = Math.sqrt(kfEstimate.reduce((sum, val) => sum + (val - avgKF) ** 2, 0) / kfEstimate.length);
 
+            // Calculate average true bulb over simulation
+            const avgTrueBulb = trueBulbVariation.reduce((a, b) => a + b, 0) / trueBulbVariation.length;
+
             // Draw results
-            drawChart(sensorA, sensorB, kfEstimate, trueBulb);
+            drawChart(sensorA, sensorB, kfEstimate, avgTrueBulb);
 
             // Display statistics
             document.getElementById('simStats').innerHTML = `
                 <h4>Simulation Results:</h4>
-                <p><strong>True Bulb Temperature:</strong> ${trueBulb.toFixed(1)}°C</p>
+                <p><strong>True Bulb Temperature:</strong> ${avgTrueBulb.toFixed(1)}°C (average over time)</p>
                 <p><strong>Sensor A:</strong> Mean = ${avgA.toFixed(1)}°C, Std = ${stdA.toFixed(1)}°C</p>
                 <p><strong>Sensor B:</strong> Mean = ${avgB.toFixed(1)}°C, Std = ${stdB.toFixed(1)}°C</p>
                 <p><strong>KF Estimate:</strong> Mean = ${avgKF.toFixed(1)}°C, Std = ${stdKF.toFixed(1)}°C</p>
-                <p><strong>KF Error:</strong> ${Math.abs(avgKF - trueBulb).toFixed(1)}°C</p>
+                <p><strong>KF Error:</strong> ${Math.abs(avgKF - avgTrueBulb).toFixed(1)}°C</p>
+                <p><strong>Noise Reduction:</strong> Sensor A Std / KF Std = ${(stdA / stdKF).toFixed(2)}x</p>
             `;
         }
 
