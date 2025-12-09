@@ -186,6 +186,98 @@
             font-size: 0.9rem;
         }
 
+        .simulator-container {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 30px;
+            margin: 30px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .simulator-controls h3 {
+            font-family: 'Crimson Text', Georgia, serif;
+            font-size: 1.4rem;
+            color: #1a365d;
+            margin-bottom: 20px;
+        }
+
+        .param-group {
+            margin-bottom: 15px;
+        }
+
+        .param-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        .param-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .sim-button {
+            width: 100%;
+            padding: 12px 20px;
+            margin-top: 10px;
+            background: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .sim-button:hover {
+            background: #2c5282;
+        }
+
+        .sim-button.secondary {
+            background: #718096;
+        }
+
+        .sim-button.secondary:hover {
+            background: #4a5568;
+        }
+
+        .simulator-output {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #simCanvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .sim-stats {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-size: 0.95rem;
+        }
+
+        .sim-stats h4 {
+            margin-bottom: 10px;
+            color: #1a365d;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 30px 20px;
@@ -202,8 +294,233 @@
             .statistics {
                 grid-template-columns: 1fr;
             }
+
+            .simulator-container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
+    <script>
+        function runSimulation() {
+            const trueBulb = parseFloat(document.getElementById('trueBulbTemp').value);
+            const dA = parseFloat(document.getElementById('distA').value);
+            const dB = parseFloat(document.getElementById('distB').value);
+            const RA = parseFloat(document.getElementById('noiseA').value);
+            const RB = parseFloat(document.getElementById('noiseB').value);
+            const Q = parseFloat(document.getElementById('processNoise').value);
+            const steps = parseInt(document.getElementById('numSteps').value);
+
+            // Compute observation coefficients
+            const HA = dB / (dA + dB);
+            const HB = dA / (dA + dB);
+
+            // Initialize arrays
+            const sensorA = [];
+            const sensorB = [];
+            const kfEstimate = [];
+
+            // Kalman Filter initialization
+            let x_hat = trueBulb;
+            let P = 10.0;
+
+            // Generate synthetic data and run KF
+            for (let i = 0; i < steps; i++) {
+                // Simulate sensor readings with noise
+                const zA = HA * trueBulb + (Math.random() - 0.5) * 2 * Math.sqrt(RA);
+                const zB = HB * trueBulb + (Math.random() - 0.5) * 2 * Math.sqrt(RB);
+
+                sensorA.push(zA);
+                sensorB.push(zB);
+
+                // Kalman Filter Prediction
+                const x_pred = x_hat;
+                const P_pred = P + Q;
+
+                // Update with Sensor A
+                const KA = P_pred * HA / (HA * HA * P_pred + RA);
+                const x_A = x_pred + KA * (zA - HA * x_pred);
+                const P_A = (1 - KA * HA) * P_pred;
+
+                // Update with Sensor B
+                const KB = P_A * HB / (HB * HB * P_A + RB);
+                x_hat = x_A + KB * (zB - HB * x_A);
+                P = (1 - KB * HB) * P_A;
+
+                kfEstimate.push(x_hat);
+            }
+
+            // Calculate statistics
+            const avgA = sensorA.reduce((a, b) => a + b, 0) / sensorA.length;
+            const avgB = sensorB.reduce((a, b) => a + b, 0) / sensorB.length;
+            const avgKF = kfEstimate.reduce((a, b) => a + b, 0) / kfEstimate.length;
+
+            const stdA = Math.sqrt(sensorA.reduce((sum, val) => sum + (val - avgA) ** 2, 0) / sensorA.length);
+            const stdB = Math.sqrt(sensorB.reduce((sum, val) => sum + (val - avgB) ** 2, 0) / sensorB.length);
+            const stdKF = Math.sqrt(kfEstimate.reduce((sum, val) => sum + (val - avgKF) ** 2, 0) / kfEstimate.length);
+
+            // Draw results
+            drawChart(sensorA, sensorB, kfEstimate, trueBulb);
+
+            // Display statistics
+            document.getElementById('simStats').innerHTML = `
+                <h4>Simulation Results:</h4>
+                <p><strong>True Bulb Temperature:</strong> ${trueBulb.toFixed(1)}°C</p>
+                <p><strong>Sensor A:</strong> Mean = ${avgA.toFixed(1)}°C, Std = ${stdA.toFixed(1)}°C</p>
+                <p><strong>Sensor B:</strong> Mean = ${avgB.toFixed(1)}°C, Std = ${stdB.toFixed(1)}°C</p>
+                <p><strong>KF Estimate:</strong> Mean = ${avgKF.toFixed(1)}°C, Std = ${stdKF.toFixed(1)}°C</p>
+                <p><strong>KF Error:</strong> ${Math.abs(avgKF - trueBulb).toFixed(1)}°C</p>
+            `;
+        }
+
+        function drawChart(dataA, dataB, dataKF, trueBulb) {
+            const canvas = document.getElementById('simCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const padding = 50;
+            const graphWidth = width - 2 * padding;
+            const graphHeight = height - 2 * padding;
+
+            const allData = [...dataA, ...dataB, ...dataKF, trueBulb];
+            const minY = Math.min(...allData) * 0.95;
+            const maxY = Math.max(...allData) * 1.05;
+            const steps = dataA.length;
+
+            // Draw axes
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (i / 5) * graphHeight;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+
+                const value = maxY - (i / 5) * (maxY - minY);
+                ctx.fillStyle = '#7f8c8d';
+                ctx.font = '12px Lato';
+                ctx.textAlign = 'right';
+                ctx.fillText(value.toFixed(0), padding - 10, y + 4);
+            }
+
+            // Helper function to convert data to canvas coordinates
+            function toY(val) {
+                return height - padding - ((val - minY) / (maxY - minY)) * graphHeight;
+            }
+
+            function toX(i) {
+                return padding + (i / (steps - 1)) * graphWidth;
+            }
+
+            // Draw true bulb line
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, toY(trueBulb));
+            ctx.lineTo(width - padding, toY(trueBulb));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw Sensor A
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            dataA.forEach((val, i) => {
+                if (i === 0) ctx.moveTo(toX(i), toY(val));
+                else ctx.lineTo(toX(i), toY(val));
+            });
+            ctx.stroke();
+
+            // Draw Sensor B
+            ctx.strokeStyle = '#004e89';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            dataB.forEach((val, i) => {
+                if (i === 0) ctx.moveTo(toX(i), toY(val));
+                else ctx.lineTo(toX(i), toY(val));
+            });
+            ctx.stroke();
+
+            // Draw KF Estimate
+            ctx.strokeStyle = '#06a77d';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            dataKF.forEach((val, i) => {
+                if (i === 0) ctx.moveTo(toX(i), toY(val));
+                else ctx.lineTo(toX(i), toY(val));
+            });
+            ctx.stroke();
+
+            // Legend
+            const legendX = width - padding - 120;
+            const legendY = padding + 20;
+
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 12px Lato';
+            ctx.textAlign = 'left';
+            ctx.fillText('True Bulb', legendX + 25, legendY);
+
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(legendX, legendY + 15);
+            ctx.lineTo(legendX + 20, legendY + 15);
+            ctx.stroke();
+            ctx.fillText('Sensor A', legendX + 25, legendY + 20);
+
+            ctx.strokeStyle = '#004e89';
+            ctx.beginPath();
+            ctx.moveTo(legendX, legendY + 35);
+            ctx.lineTo(legendX + 20, legendY + 35);
+            ctx.stroke();
+            ctx.fillText('Sensor B', legendX + 25, legendY + 40);
+
+            ctx.strokeStyle = '#06a77d';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(legendX, legendY + 55);
+            ctx.lineTo(legendX + 20, legendY + 55);
+            ctx.stroke();
+            ctx.fillText('KF Estimate', legendX + 25, legendY + 60);
+
+            // Axes labels
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Lato';
+            ctx.textAlign = 'center';
+            ctx.fillText('Time Steps', width / 2, height - 15);
+
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Temperature (°C)', 0, 0);
+            ctx.restore();
+        }
+
+        function useRealData() {
+            document.getElementById('trueBulbTemp').value = 250;
+            document.getElementById('distA').value = 5;
+            document.getElementById('distB').value = 15;
+            document.getElementById('noiseA').value = 2.0;
+            document.getElementById('noiseB').value = 0.5;
+            document.getElementById('processNoise').value = 0.1;
+            document.getElementById('numSteps').value = 50;
+            
+            runSimulation();
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -301,6 +618,62 @@ z<sub>B</sub> = (d<sub>A</sub>/(d<sub>A</sub> + d<sub>B</sub>)) × x + v<sub>B</
             <li>The Kalman Filter estimate smoothly tracks the bulb temperature while rejecting sensor noise</li>
             <li>At t=100s: z<sub>A</sub>=40.5°C, z<sub>B</sub>=31.5°C, KF estimate=69.0°C</li>
         </ul>
+    </section>
+
+    <section>
+        <h2>Interactive Simulation Tool</h2>
+        <p>
+            Try the Kalman Filter with your own parameters or simulate custom sensor data:
+        </p>
+        
+        <div class="simulator-container">
+            <div class="simulator-controls">
+                <h3>Configure Parameters</h3>
+                
+                <div class="param-group">
+                    <label for="trueBulbTemp">True Bulb Temperature (°C):</label>
+                    <input type="number" id="trueBulbTemp" value="250" min="100" max="400" step="10">
+                </div>
+                
+                <div class="param-group">
+                    <label for="distA">Sensor A Distance (cm):</label>
+                    <input type="number" id="distA" value="5" min="1" max="20" step="1">
+                </div>
+                
+                <div class="param-group">
+                    <label for="distB">Sensor B Distance (cm):</label>
+                    <input type="number" id="distB" value="15" min="5" max="50" step="1">
+                </div>
+                
+                <div class="param-group">
+                    <label for="noiseA">Sensor A Noise (R<sub>A</sub>):</label>
+                    <input type="number" id="noiseA" value="2.0" min="0.1" max="10" step="0.1">
+                </div>
+                
+                <div class="param-group">
+                    <label for="noiseB">Sensor B Noise (R<sub>B</sub>):</label>
+                    <input type="number" id="noiseB" value="0.5" min="0.1" max="10" step="0.1">
+                </div>
+                
+                <div class="param-group">
+                    <label for="processNoise">Process Noise (Q):</label>
+                    <input type="number" id="processNoise" value="0.1" min="0" max="2" step="0.1">
+                </div>
+                
+                <div class="param-group">
+                    <label for="numSteps">Number of Time Steps:</label>
+                    <input type="number" id="numSteps" value="50" min="10" max="200" step="10">
+                </div>
+                
+                <button class="sim-button" onclick="runSimulation()">Run Simulation</button>
+                <button class="sim-button secondary" onclick="useRealData()">Use Our Experimental Data</button>
+            </div>
+            
+            <div class="simulator-output">
+                <canvas id="simCanvas" width="600" height="400"></canvas>
+                <div id="simStats" class="sim-stats"></div>
+            </div>
+        </div>
     </section>
 
     <section>
