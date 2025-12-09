@@ -353,6 +353,7 @@
             const sensorA = [];
             const sensorB = [];
             const kfEstimate = [];
+            const kfVariance = []; // Store posterior variance at each step
 
             // Kalman Filter initialization - start with uncertain initial guess
             let x_hat = trueBulb * 0.5; // Start with underestimate
@@ -396,6 +397,7 @@
                 P = (1 - KB * HB) * P_A;
 
                 kfEstimate.push(x_hat);
+                kfVariance.push(P); // Store posterior variance
             }
 
             // Calculate statistics
@@ -415,6 +417,7 @@
                 sensorA: sensorA,
                 sensorB: sensorB,
                 kfEstimate: kfEstimate,
+                kfVariance: kfVariance,
                 trueBulbVariation: trueBulbVariation,
                 HA: HA,
                 HB: HB,
@@ -600,10 +603,12 @@
 
             ctx.clearRect(0, 0, width, height);
 
-            const { sensorA, sensorB, trueBulbVariation, HA, HB, RA, RB } = simulationData;
+            const { sensorA, sensorB, kfEstimate, kfVariance, trueBulbVariation, HA, HB, RA, RB } = simulationData;
             
             const zA = sensorA[timeStep];
             const zB = sensorB[timeStep];
+            const xKF = kfEstimate[timeStep];
+            const PKF = kfVariance[timeStep];
             const trueBulb = trueBulbVariation[timeStep];
 
             // Calculate expected values (means of distributions)
@@ -625,15 +630,16 @@
                        Math.exp(-0.5 * ((x - mu) / sigma) ** 2);
             }
 
-            // Determine plot range
-            const minX = Math.min(muA - 4 * Math.sqrt(RA), muB - 4 * Math.sqrt(RB));
-            const maxX = Math.max(muA + 4 * Math.sqrt(RA), muB + 4 * Math.sqrt(RB));
+            // Determine plot range - include KF distribution
+            const minX = Math.min(muA - 4 * Math.sqrt(RA), muB - 4 * Math.sqrt(RB), xKF - 4 * Math.sqrt(PKF));
+            const maxX = Math.max(muA + 4 * Math.sqrt(RA), muB + 4 * Math.sqrt(RB), xKF + 4 * Math.sqrt(PKF));
             const range = maxX - minX;
 
-            // Find max PDF value for scaling
+            // Find max PDF value for scaling - include KF posterior
             const maxPDF = Math.max(
                 gaussian(muA, muA, Math.sqrt(RA)),
-                gaussian(muB, muB, Math.sqrt(RB))
+                gaussian(muB, muB, Math.sqrt(RB)),
+                gaussian(xKF, xKF, Math.sqrt(PKF))
             );
 
             function toX(val) {
@@ -670,6 +676,19 @@
             }
             ctx.stroke();
 
+            // Draw KF Posterior distribution N(x̂_KF, P_KF) - NARROWER and TALLER
+            ctx.strokeStyle = '#06a77d';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let x = minX; x <= maxX; x += range / 200) {
+                const pdf = gaussian(x, xKF, Math.sqrt(PKF));
+                const px = toX(x);
+                const py = toY(pdf);
+                if (x === minX) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
             // Mark actual measurements with vertical lines
             ctx.strokeStyle = '#ff6b35';
             ctx.lineWidth = 2;
@@ -684,6 +703,14 @@
             ctx.moveTo(toX(zB), height - padding);
             ctx.lineTo(toX(zB), toY(gaussian(zB, muB, Math.sqrt(RB))));
             ctx.stroke();
+
+            // Mark KF estimate
+            ctx.strokeStyle = '#06a77d';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(toX(xKF), height - padding);
+            ctx.lineTo(toX(xKF), toY(gaussian(xKF, xKF, Math.sqrt(PKF))));
+            ctx.stroke();
             ctx.setLineDash([]);
 
             // Draw circles at measurement points
@@ -695,6 +722,12 @@
             ctx.fillStyle = '#004e89';
             ctx.beginPath();
             ctx.arc(toX(zB), toY(gaussian(zB, muB, Math.sqrt(RB))), 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Draw circle at KF estimate
+            ctx.fillStyle = '#06a77d';
+            ctx.beginPath();
+            ctx.arc(toX(xKF), toY(gaussian(xKF, xKF, Math.sqrt(PKF))), 6, 0, 2 * Math.PI);
             ctx.fill();
 
             // Labels
@@ -724,8 +757,12 @@
             ctx.fillText(`Sensor B: N(${muB.toFixed(1)}, ${Math.sqrt(RB).toFixed(1)}²)`, legendX, legendY + 40);
             ctx.fillText(`Measured: ${zB.toFixed(1)}°C`, legendX + 10, legendY + 55);
 
+            ctx.fillStyle = '#06a77d';
+            ctx.fillText(`KF Posterior: N(${xKF.toFixed(1)}, ${Math.sqrt(PKF).toFixed(2)}²)`, legendX, legendY + 80);
+            ctx.fillText(`Estimate: ${xKF.toFixed(1)}°C`, legendX + 10, legendY + 95);
+
             ctx.fillStyle = '#2c3e50';
-            ctx.fillText(`True Bulb: ${trueBulb.toFixed(1)}°C`, legendX, legendY + 80);
+            ctx.fillText(`True Bulb: ${trueBulb.toFixed(1)}°C`, legendX, legendY + 120);
         }
 
         function useRealData() {
