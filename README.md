@@ -1,144 +1,171 @@
-# 📊 Kalman Filter - Interactive Probability Visualization
+# 🌡️ Indirect Temperature Estimation Using Kalman Filter (Two Sensors)
 
-An interactive educational web application that demonstrates the **Kalman Filter** algorithm with real-world data examples. This project helps students understand how probability theory applies to signal processing and estimation.
+An academic research project demonstrating **Bayesian inference through Kalman Filter** for indirect temperature measurement in building environment simulations. This project solves the challenge of estimating hidden bulb temperature (200-300°C) using two complementary air temperature sensors.
 
-![Kalman Filter Demo](https://img.shields.io/badge/Demo-Live-brightgreen)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![Project Status](https://img.shields.io/badge/Status-Complete-success)
+![Academic](https://img.shields.io/badge/Type-Academic%20Research-blue)
+![Probability](https://img.shields.io/badge/Course-Probability%20Fall%202025-orange)
+
+## 👥 Authors
+- **Tran Hoai Nhan**
+- **Le Hong Nhat Tan**
+
+**Course:** Probability Course Fall 2025  
+**Professor:** Tran Vinh Linh
 
 ## 🎯 Project Overview
 
-This project was created as a **Final Project for Probability Course** to demonstrate how theoretical probability concepts apply to real-world applications.
+In Computational Fluid Dynamics (CFD) simulations of building environments, accurate boundary conditions are critical. Dr. Nguyen Hop Minh's experimental setup requires precise knowledge of a hot bulb's surface temperature (200–300°C) to validate CFD models. However, direct measurement is impractical—sensors would melt at such temperatures.
 
-### What is the Kalman Filter?
+### The Solution
+We developed an **indirect measurement approach** using two air temperature sensors positioned at different distances from the heat source, combining their readings through a **Kalman Filter** to estimate the bulb's temperature via **sequential Bayesian inference**.
 
-The Kalman Filter is an algorithm that estimates the true state of a system from noisy measurements. It's used in:
-- 📱 **GPS Navigation** - Smoothing location data
-- 🚗 **Self-driving Cars** - Sensor fusion
-- 📈 **Stock Market** - Trend analysis
-- 🌡️ **Weather Stations** - Temperature filtering
-- 🤖 **Robotics** - Position estimation
+## 🔬 Methodology
+
+### Sensor Configuration
+- **Sensor A (Close):** d_A = 5 cm, R_A = 2.0 (higher signal, more noise)
+- **Sensor B (Far):** d_B = 15 cm, R_B = 0.5 (lower signal, stable)
+
+### Mathematical Framework
+The Kalman Filter implements optimal Bayesian estimation with Gaussian distributions:
+
+**Prior Belief:** p(x) = N(x; x̂, P)  
+**Likelihood:** p(z|x) = N(z; Hx, R)  
+**Posterior:** p(x|z) ∝ p(z|x) · p(x)
+
+### Key Results
+- **Bulb Estimate:** Mean = 67.2°C, Std = 2.2°C (over 600s)
+- **Sensor Fusion:** Optimally combines proximity advantage with stability
+- **Adaptive Weighting:** Kalman Gain dynamically adjusts based on uncertainty
 
 ## ✨ Features
 
-### 📈 Before vs After Comparison
-- Side-by-side visualization of raw noisy data vs Kalman filtered output
-- Clear visual proof that the filter reduces noise while preserving trends
+### 📊 Interactive Simulation Tool
+- Configure true bulb temperature (100-400°C)
+- Adjust sensor distances and noise levels
+- Set process noise (Q) for system uncertainty
+- Real-time Kalman Filter visualization
+- Statistical analysis of results
 
-### 🔄 Multiple Data Sources
-Switch between different real-world data patterns:
-- ₿ **Bitcoin Price** - Cryptocurrency volatility
-- 🌡️ **Temperature** - Weather sensor readings
-- 📈 **Stock Market** - Financial index movements
-- 📡 **Sensor Data** - Accelerometer readings
-- 📍 **GPS Track** - Location coordinates
+### 📈 Real Experimental Data
+- 600 seconds of continuous measurements
+- Sensor A: Mean = 36.4°C, Std = 2.1°C
+- Sensor B: Mean = 30.5°C, Std = 0.6°C
+- Live comparison graphs
 
-### 🎛️ Interactive Controls
-- Adjust **Measurement Noise (R)** - How noisy your sensor is
-- Adjust **Process Noise (Q)** - How much the system changes
-- Real-time visualization updates
+### 📐 Mathematical Rigor
+- Complete Bayesian framework equations
+- Prediction step (prior propagation)
+- Update step (posterior via Bayes)
+- Observation model with explicit coefficients
 
-### 📚 Educational Content
-- **Probability Connection** - How Kalman relates to Gaussian distributions, Bayes' theorem, and variance
-- **Simple Math Explanation** - Just 3 easy steps with examples
-- **Intuitive Analogies** - No-math explanations anyone can understand
+## 📐 Mathematical Framework
 
-### 🧮 Interactive Calculator
-- Input your own values
-- Step-by-step calculation breakdown
-- Understand each part of the algorithm
-
-### 📊 Statistical Validation
-- Variance reduction percentage
-- Noise level comparison bars
-- Trend preservation correlation
-
-## 🔢 The Math (Simplified!)
-
-The Kalman Filter works in **3 simple steps**:
-
-### Step 1: Calculate Trust Factor (Kalman Gain)
+### Heat Diffusion Model
 ```
-K = P / (P + R)
+z_A = H_A × x + v_A,  where H_A = 0.75
+z_B = H_B × x + v_B,  where H_B = 0.25
 ```
-- `K` = How much to trust the measurement (0 to 1)
-- `P` = Our current uncertainty
-- `R` = Measurement noise
+- `x` = True bulb temperature (hidden state)
+- `z_A, z_B` = Sensor measurements
+- `H_A, H_B` = Observation coefficients (distance-based)
+- `v_A ~ N(0, R_A)`, `v_B ~ N(0, R_B)` = Gaussian noise
 
-### Step 2: Update Estimate
+### Kalman Filter Algorithm
+
+**Prediction Step (Prior Propagation):**
 ```
-New Estimate = Old Estimate + K × (Measurement - Old Estimate)
+x̂_pred = x̂_prev          (propagate mean)
+P_pred = P_prev + Q       (increase uncertainty)
 ```
-This is just a **weighted average**!
 
-### Step 3: Update Uncertainty
+**Update Step (Posterior via Bayes):**
+
+*Sequential Fusion with Sensor A:*
 ```
-P_new = (1 - K) × P_old
+K_A = P_pred / (P_pred + R_A)                    (Bayes weight)
+x̂_A = x̂_pred + K_A(z_A - H_A × x̂_pred)         (posterior mean)
+P_A = (1 - K_A × H_A) × P_pred                   (posterior variance)
 ```
-Uncertainty decreases after each measurement.
 
-## 🎲 Probability Concepts Used
+*Sequential Fusion with Sensor B:*
+```
+K_B = P_A / (P_A + R_B)                          (Bayes weight)
+x̂_new = x̂_A + K_B(z_B - H_B × x̂_A)             (final posterior)
+P_new = (1 - K_B × H_B) × P_A                    (final variance)
+```
 
-| Concept | How It's Used |
-|---------|---------------|
-| **Gaussian Distribution** | Measurements assumed to follow normal distribution |
-| **Variance (σ²)** | P represents uncertainty/spread of our estimate |
-| **Weighted Average** | Combining prediction and measurement |
-| **Bayes' Theorem** | Updating beliefs based on new evidence |
-| **Conditional Probability** | P(true state \| measurements) |
-| **Expected Value** | The weighted average formula |
+## 🎲 Probability Concepts
 
-## 🚀 Getting Started
+| Concept | Application |
+|---------|-------------|
+| **Gaussian Distributions** | Prior p(x) = N(x; x̂, P), Likelihood p(z\|x) = N(z; Hx, R) |
+| **Bayes' Rule** | Posterior p(x\|z) ∝ p(z\|x) · p(x) |
+| **Sequential Inference** | Update belief with each new measurement |
+| **Optimal Fusion** | Kalman Gain minimizes mean squared error |
+| **Uncertainty Quantification** | Variance P tracks estimation confidence |
 
-### Option 1: Open Locally
-Simply open `kalman-realdata.html` in any modern web browser.
+## 🚀 Live Demo
 
-### Option 2: View Online
-Visit the GitHub Pages site: [Live Demo](https://YOUR_USERNAME.github.io/FinalProjectProbability/)
+**Website:** [https://leonathn.github.io/FinalProjectProbability](https://leonathn.github.io/FinalProjectProbability)
 
-## 📁 Project Structure
+### Features:
+- Real experimental setup photos and diagrams
+- Interactive simulation tool with adjustable parameters
+- Real-time Kalman Filter visualization
+- Downloadable data and analysis files
+
+## 📁 Repository Structure
 
 ```
 FinalProjectProbability/
-├── README.md                 # This file
-├── kalman-realdata.html      # Main interactive visualization
-└── index.html                # (Optional) Landing page
+├── README.md                      # Project documentation
+├── index.html                     # Main website with interactive tool
+├── poster_landscape.pdf           # Academic poster
+├── SensorPlacement.png            # Real experimental setup photo
+├── SensorPlacementDiagram.png     # Schematic diagram
+├── experimental_results.png       # Results visualization
+├── temperature_data.csv           # Raw sensor measurements
+├── kalman_results.csv             # Kalman Filter outputs
+└── Temperature_Analysis.xlsx      # Statistical analysis
 ```
 
-## 🛠️ Technologies Used
+## 🛠️ Technologies
 
-- **HTML5** - Structure and Canvas API for charts
-- **CSS3** - Modern styling with gradients and animations
-- **JavaScript** - Kalman Filter implementation and interactivity
-- **No external dependencies** - Runs entirely in the browser!
+- **HTML5/CSS3/JavaScript** - Interactive web interface with Canvas API
+- **Python** - Data analysis and graph generation (matplotlib, pandas, numpy)
+- **LaTeX (TikZposter)** - Academic poster design
+- **GitHub Pages** - Hosting and deployment
 
-## 📖 How to Use
+## 📊 Data Files
 
-1. **Select a Data Source** - Click on Bitcoin, Temperature, Stock, etc.
-2. **View Before/After** - See the raw noisy data vs filtered result
-3. **Adjust Parameters** - Use sliders to change R (measurement noise) and Q (process noise)
-4. **Read the Explanation** - Scroll down to understand the math
-5. **Try the Calculator** - Input your own values to see step-by-step calculations
+All experimental data is available for download:
+- **temperature_data.csv** - 61 data points over 600 seconds
+- **kalman_results.csv** - Filtered estimates and sensor readings
+- **Temperature_Analysis.xlsx** - Complete statistical analysis
 
-## 🎓 Learning Objectives
+## 🎓 Key Takeaways
 
-After using this visualization, you will understand:
-- ✅ How noise affects measurements
-- ✅ Why averaging improves estimates
-- ✅ How the Kalman Gain balances trust between prediction and measurement
-- ✅ How uncertainty decreases with more data
-- ✅ Real-world applications of probability theory
+- **Indirect Measurement:** Infer hidden states from observable quantities using domain knowledge
+- **Sensor Fusion:** Multiple imperfect sensors provide complementary information
+- **Bayesian Approach:** Model uncertainty explicitly for optimal estimation
+- **Real-World Validation:** Method tested on actual experimental data from building environment research
 
-## 👨‍💻 Author
+## 📖 References
 
-**Tran Hoai Nhan - Le Hong Nhat Tan**  
-Final Project - Probability and Statistics Course  
-December 2025
+1. Kalman, R. E. (1960). "A New Approach to Linear Filtering and Prediction Problems." *Journal of Basic Engineering*, 82(D): 35-45.
+2. Welch, G., & Bishop, G. (2006). "An Introduction to the Kalman Filter." *UNC Chapel Hill*, TR 95-041.
+3. Simon, D. (2006). *Optimal State Estimation: Kalman, H∞, and Nonlinear Approaches*. Wiley-Interscience.
 
-## 📄 License
+## 📧 Contact
 
-This project is open source and available under the [MIT License](LICENSE).
+For questions or collaboration opportunities:
+- **GitHub:** [@leonathn](https://github.com/leonathn)
+- **Course:** Probability Fall 2025, Professor Tran Vinh Linh
+
+---
+
+© 2025 Tran Hoai Nhan & Le Hong Nhat Tan | Probability Course Fall 2025
 
 ## 🙏 Acknowledgments
 
