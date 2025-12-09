@@ -278,6 +278,41 @@
             color: #1a365d;
         }
 
+        #distributionCanvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+            margin-top: 15px;
+        }
+
+        .distribution-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .distribution-controls label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .distribution-controls input[type="range"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .distribution-controls span {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 30px 20px;
@@ -375,6 +410,18 @@
             // Calculate average true bulb over simulation
             const avgTrueBulb = trueBulbVariation.reduce((a, b) => a + b, 0) / trueBulbVariation.length;
 
+            // Store data globally for distribution visualization
+            simulationData = {
+                sensorA: sensorA,
+                sensorB: sensorB,
+                kfEstimate: kfEstimate,
+                trueBulbVariation: trueBulbVariation,
+                HA: HA,
+                HB: HB,
+                RA: RA,
+                RB: RB
+            };
+
             // Draw results
             drawChart(sensorA, sensorB, kfEstimate, avgTrueBulb);
 
@@ -388,6 +435,18 @@
                 <p><strong>KF Error:</strong> ${Math.abs(avgKF - avgTrueBulb).toFixed(1)}°C</p>
                 <p><strong>Noise Reduction:</strong> Sensor A Std / KF Std = ${(stdA / stdKF).toFixed(2)}x</p>
             `;
+
+            // Setup time step slider
+            const slider = document.getElementById('timeStepSlider');
+            slider.max = steps - 1;
+            slider.value = 0;
+            slider.oninput = function() {
+                document.getElementById('timeStepValue').textContent = `t = ${this.value}`;
+                drawDistributions(parseInt(this.value));
+            };
+
+            // Draw initial distribution
+            drawDistributions(0);
         }
 
         function drawChart(dataA, dataB, dataKF, trueBulb) {
@@ -525,6 +584,148 @@
             ctx.rotate(-Math.PI / 2);
             ctx.fillText('Temperature (°C)', 0, 0);
             ctx.restore();
+        }
+
+        // Store simulation data globally for distribution visualization
+        let simulationData = null;
+
+        function drawDistributions(timeStep) {
+            if (!simulationData) return;
+
+            const canvas = document.getElementById('distributionCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 50;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const { sensorA, sensorB, trueBulbVariation, HA, HB, RA, RB } = simulationData;
+            
+            const zA = sensorA[timeStep];
+            const zB = sensorB[timeStep];
+            const trueBulb = trueBulbVariation[timeStep];
+
+            // Calculate expected values (means of distributions)
+            const muA = HA * trueBulb;
+            const muB = HB * trueBulb;
+
+            // Draw axes
+            ctx.strokeStyle = '#2c3e50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+
+            // Helper function: Gaussian PDF
+            function gaussian(x, mu, sigma) {
+                return (1 / (sigma * Math.sqrt(2 * Math.PI))) * 
+                       Math.exp(-0.5 * ((x - mu) / sigma) ** 2);
+            }
+
+            // Determine plot range
+            const minX = Math.min(muA - 4 * Math.sqrt(RA), muB - 4 * Math.sqrt(RB));
+            const maxX = Math.max(muA + 4 * Math.sqrt(RA), muB + 4 * Math.sqrt(RB));
+            const range = maxX - minX;
+
+            // Find max PDF value for scaling
+            const maxPDF = Math.max(
+                gaussian(muA, muA, Math.sqrt(RA)),
+                gaussian(muB, muB, Math.sqrt(RB))
+            );
+
+            function toX(val) {
+                return padding + ((val - minX) / range) * (width - 2 * padding);
+            }
+
+            function toY(pdf) {
+                return height - padding - (pdf / maxPDF) * (height - 2 * padding);
+            }
+
+            // Draw Sensor A distribution N(H_A * x, R_A)
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = minX; x <= maxX; x += range / 200) {
+                const pdf = gaussian(x, muA, Math.sqrt(RA));
+                const px = toX(x);
+                const py = toY(pdf);
+                if (x === minX) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Draw Sensor B distribution N(H_B * x, R_B)
+            ctx.strokeStyle = '#004e89';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = minX; x <= maxX; x += range / 200) {
+                const pdf = gaussian(x, muB, Math.sqrt(RB));
+                const px = toX(x);
+                const py = toY(pdf);
+                if (x === minX) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // Mark actual measurements with vertical lines
+            ctx.strokeStyle = '#ff6b35';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(toX(zA), height - padding);
+            ctx.lineTo(toX(zA), toY(gaussian(zA, muA, Math.sqrt(RA))));
+            ctx.stroke();
+
+            ctx.strokeStyle = '#004e89';
+            ctx.beginPath();
+            ctx.moveTo(toX(zB), height - padding);
+            ctx.lineTo(toX(zB), toY(gaussian(zB, muB, Math.sqrt(RB))));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw circles at measurement points
+            ctx.fillStyle = '#ff6b35';
+            ctx.beginPath();
+            ctx.arc(toX(zA), toY(gaussian(zA, muA, Math.sqrt(RA))), 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#004e89';
+            ctx.beginPath();
+            ctx.arc(toX(zB), toY(gaussian(zB, muB, Math.sqrt(RB))), 5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // Labels
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Lato';
+            ctx.textAlign = 'center';
+            ctx.fillText('Measurement Value (°C)', width / 2, height - 15);
+
+            ctx.save();
+            ctx.translate(15, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Probability Density', 0, 0);
+            ctx.restore();
+
+            // Legend
+            const legendX = width - 200;
+            const legendY = padding + 20;
+
+            ctx.font = 'bold 12px Lato';
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = '#ff6b35';
+            ctx.fillText(`Sensor A: N(${muA.toFixed(1)}, ${Math.sqrt(RA).toFixed(1)}²)`, legendX, legendY);
+            ctx.fillText(`Measured: ${zA.toFixed(1)}°C`, legendX + 10, legendY + 15);
+
+            ctx.fillStyle = '#004e89';
+            ctx.fillText(`Sensor B: N(${muB.toFixed(1)}, ${Math.sqrt(RB).toFixed(1)}²)`, legendX, legendY + 40);
+            ctx.fillText(`Measured: ${zB.toFixed(1)}°C`, legendX + 10, legendY + 55);
+
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillText(`True Bulb: ${trueBulb.toFixed(1)}°C`, legendX, legendY + 80);
         }
 
         function useRealData() {
@@ -804,6 +1005,18 @@ x̂<sub>new</sub> ≈ x̂<sub>pred</sub> + 1 × (z - Hx̂<sub>pred</sub>) ≈ z
             <div class="simulator-output">
                 <canvas id="simCanvas" width="600" height="400"></canvas>
                 <div id="simStats" class="sim-stats"></div>
+                
+                <h4 style="margin-top: 20px; color: #1a365d;">Measurement Distributions (Random Variables)</h4>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">
+                    Each sensor measurement is a random variable following a Gaussian distribution N(μ, R). 
+                    Use the slider to see the distribution at different time steps:
+                </p>
+                <canvas id="distributionCanvas" width="600" height="300"></canvas>
+                <div class="distribution-controls">
+                    <label for="timeStepSlider">Time Step:</label>
+                    <input type="range" id="timeStepSlider" min="0" max="49" value="0" step="1">
+                    <span id="timeStepValue">t = 0</span>
+                </div>
             </div>
         </div>
     </section>
