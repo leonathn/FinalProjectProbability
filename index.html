@@ -550,16 +550,45 @@
     <section>
         <h2>Methodology</h2>
         
-        <h3>Sensor Configuration</h3>
+        <h3>Experimental Setup</h3>
         <div class="figure">
-            <img src="SensorPlacement.png" alt="Sensor placement diagram">
-            <p class="figure-caption">Figure 1: Sensor placement geometry showing hot bulb (center), Sensor A (close), and Sensor B (far).</p>
+            <img src="SensorPlacement.png" alt="Real experimental setup">
+            <p class="figure-caption">Figure 1a: Real experimental setup showing the heat source box with two ambient temperature sensors at different distances.</p>
+        </div>
+
+        <div class="figure">
+            <img src="SensorPlacement (1).png" alt="Sensor placement diagram">
+            <p class="figure-caption">Figure 1b: Schematic diagram - Hot bulb (center) radiates heat to Sensor A (close, d<sub>A</sub> = 5 cm) and Sensor B (far, d<sub>B</sub> = 15 cm).</p>
         </div>
 
         <div class="parameters">
-            <p><strong>Sensor A:</strong> Positioned close to the bulb (d<sub>A</sub> = 5 cm). Measures near-field temperature with higher signal but more noise (R<sub>A</sub> = 2.0).</p>
-            <p><strong>Sensor B:</strong> Positioned farther from the bulb (d<sub>B</sub> = 15 cm). Measures far-field temperature with lower signal but less noise (R<sub>B</sub> = 0.5).</p>
+            <p><strong>Sensor A (Close):</strong> Positioned at d<sub>A</sub> = 5 cm from the bulb. Captures near-field temperature with higher signal but more noise (R<sub>A</sub> = 2.0). Experiences stronger thermal fluctuations due to convection effects.</p>
+            <p><strong>Sensor B (Far):</strong> Positioned at d<sub>B</sub> = 15 cm from the bulb. Measures far-field temperature with lower signal but higher stability (R<sub>B</sub> = 0.5). Provides reliable baseline measurements.</p>
         </div>
+
+        <h3>Mathematical Framework: Bayesian Inference</h3>
+        <p>
+            The Kalman Filter implements optimal Bayesian estimation using Gaussian distributions:
+        </p>
+
+        <div class="equation">
+<strong>Prior Belief:</strong> p(x) = N(x; x̂, P)<br>
+where x = T<sub>bulb</sub> is the hidden state (true bulb temperature)
+        </div>
+
+        <div class="equation">
+<strong>Likelihood:</strong> p(z|x) = N(z; Hx, R)<br>
+where z = sensor measurement, H = observation coefficient, R = measurement noise variance
+        </div>
+
+        <div class="equation">
+<strong>Posterior (Bayes' Rule):</strong> p(x|z) ∝ p(z|x) · p(x)<br>
+Results in: p(x|z) = N(x; μ<sub>post</sub>, σ²<sub>post</sub>)
+        </div>
+
+        <p>
+            The Kalman Filter computes the posterior mean (μ<sub>post</sub>) and variance (σ²<sub>post</sub>) in closed form through two steps:
+        </p>
 
         <h3>Heat Diffusion Model</h3>
         <p>
@@ -567,23 +596,43 @@
             The observed air temperatures at each sensor depend on distance through an inverse relationship:
         </p>
         <div class="equation">
-z<sub>A</sub> = (d<sub>B</sub>/(d<sub>A</sub> + d<sub>B</sub>)) × x + v<sub>A</sub><br>
-z<sub>B</sub> = (d<sub>A</sub>/(d<sub>A</sub> + d<sub>B</sub>)) × x + v<sub>B</sub>
+z<sub>A</sub> = H<sub>A</sub> × x + v<sub>A</sub>,  where H<sub>A</sub> = d<sub>B</sub>/(d<sub>A</sub> + d<sub>B</sub>) = 15/20 = 0.75<br>
+z<sub>B</sub> = H<sub>B</sub> × x + v<sub>B</sub>,  where H<sub>B</sub> = d<sub>A</sub>/(d<sub>A</sub> + d<sub>B</sub>) = 5/20 = 0.25
         </div>
         <p>
-            where v<sub>A</sub> ~ N(0, R<sub>A</sub>) and v<sub>B</sub> ~ N(0, R<sub>B</sub>) represent measurement noise.
+            where v<sub>A</sub> ~ N(0, R<sub>A</sub>) and v<sub>B</sub> ~ N(0, R<sub>B</sub>) represent Gaussian measurement noise.
         </p>
 
         <h3>Kalman Filter Algorithm</h3>
+        
+        <h4>Prediction Step (Prior Propagation)</h4>
+        <div class="equation">
+x̂<sub>pred</sub> = x̂<sub>prev</sub>  (propagate mean - assuming constant temperature)<br>
+P<sub>pred</sub> = P<sub>prev</sub> + Q  (increase uncertainty with process noise)
+        </div>
         <p>
-            The Kalman Filter optimally fuses the two noisy sensor readings by:
+            This gives the prior distribution p(x) = N(x; x̂<sub>pred</sub>, P<sub>pred</sub>) before incorporating new measurements.
         </p>
-        <ul>
-            <li><strong>Prediction Step:</strong> Propagate state estimate assuming constant temperature (x̂<sub>k|k-1</sub> = x̂<sub>k-1</sub>)</li>
-            <li><strong>Update Step:</strong> Correct prediction using weighted sensor measurements, with weights inversely proportional to sensor noise variance</li>
-        </ul>
+
+        <h4>Update Step (Posterior via Bayes)</h4>
+        <p><strong>Sequential Fusion with Sensor A:</strong></p>
+        <div class="equation">
+K<sub>A</sub> = P<sub>pred</sub>/(P<sub>pred</sub> + R<sub>A</sub>)  <em>(Bayes weight - Kalman Gain)</em><br>
+x̂<sub>A</sub> = x̂<sub>pred</sub> + K<sub>A</sub>(z<sub>A</sub> - H<sub>A</sub>x̂<sub>pred</sub>)  <em>(posterior mean)</em><br>
+P<sub>A</sub> = (1 - K<sub>A</sub>H<sub>A</sub>)P<sub>pred</sub>  <em>(posterior variance)</em>
+        </div>
+
+        <p><strong>Sequential Fusion with Sensor B:</strong></p>
+        <div class="equation">
+K<sub>B</sub> = P<sub>A</sub>/(P<sub>A</sub> + R<sub>B</sub>)  <em>(Bayes weight)</em><br>
+x̂<sub>new</sub> = x̂<sub>A</sub> + K<sub>B</sub>(z<sub>B</sub> - H<sub>B</sub>x̂<sub>A</sub>)  <em>(final posterior mean)</em><br>
+P<sub>new</sub> = (1 - K<sub>B</sub>H<sub>B</sub>)P<sub>A</sub>  <em>(final posterior variance)</em>
+        </div>
+
         <p>
-            The filter automatically adapts: when Sensor A (close, noisy) reads high, the filter weighs Sensor B (far, stable) more heavily, and vice versa.
+            <strong>Key Insight:</strong> The Kalman Gain K acts as the Bayesian weight, automatically balancing sensor contributions based on relative uncertainties. 
+            When Sensor A is noisy (large R<sub>A</sub>), K<sub>A</sub> decreases, giving more weight to the prior. 
+            The filter optimally combines both sensors' information to minimize estimation error.
         </p>
     </section>
 
