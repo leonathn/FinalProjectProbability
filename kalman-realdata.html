@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalman Filter - Interactive Educational Visualization</title>
+    <title>Indirect Temperature Estimation Using Kalman Filter (Two Sensors)</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Source+Sans+Pro:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -941,24 +941,24 @@
 <body>
     <div class="container">
         <header>
-            <h1>Kalman Filter: Interactive Educational Visualization</h1>
-            <p>A probabilistic approach to signal estimation and noise reduction</p>
+            <h1>Indirect Temperature Estimation Using Kalman Filter</h1>
+            <p>Estimating hidden bulb temperature from two indirect sensor measurements</p>
             <div class="academic-badge">Probability & Statistics • Final Project</div>
         </header>
 
         <!-- MAIN TAB NAVIGATION -->
         <div class="main-tabs">
             <button class="main-tab active" data-tab="demo">
-                <span class="tab-icon">📊</span>Live Demo
+                <span class="tab-icon">📊</span>Interactive Demo
             </button>
             <button class="main-tab" data-tab="theory">
-                <span class="tab-icon">📚</span>Theory & Math
+                <span class="tab-icon">📚</span>The Problem
             </button>
             <button class="main-tab" data-tab="calculator">
-                <span class="tab-icon">🧮</span>Calculator
+                <span class="tab-icon">🧮</span>Step-by-Step
             </button>
             <button class="main-tab" data-tab="apollo">
-                <span class="tab-icon">🚀</span>Apollo 11 Case Study
+                <span class="tab-icon">💡</span>Complete Example
             </button>
         </div>
 
@@ -971,22 +971,19 @@
                 <span id="statusText">Loading data...</span>
             </div>
 
-            <!-- DATA SOURCE SELECTOR -->
+            <!-- SENSOR SELECTOR -->
             <div class="data-selector">
-                <button class="data-btn active" data-source="bitcoin">
-                    <span class="icon">₿</span>Bitcoin Price
+                <div style="text-align: center; margin-bottom: 10px; color: #4a5568; font-weight: 600;">
+                    Choose which sensor data to visualize:
+                </div>
+                <button class="data-btn active" data-source="both">
+                    <span class="icon">🔀</span>Both Sensors + Estimate
                 </button>
-                <button class="data-btn" data-source="weather">
-                    <span class="icon">🌡️</span>Temperature
+                <button class="data-btn" data-source="sensorA">
+                    <span class="icon">🟠</span>Sensor A (Near-Bulb)
                 </button>
-                <button class="data-btn" data-source="stocks">
-                    <span class="icon">📈</span>Stock Market
-                </button>
-                <button class="data-btn" data-source="sensor">
-                    <span class="icon">📡</span>Sensor Data
-                </button>
-                <button class="data-btn" data-source="gps">
-                    <span class="icon">📍</span>GPS Track
+                <button class="data-btn" data-source="sensorB">
+                    <span class="icon">🔵</span>Sensor B (Room-Air)
                 </button>
             </div>
 
@@ -1207,163 +1204,268 @@
         <!-- TAB 2: THEORY & MATH -->
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-theory">
-        <!-- KALMAN FILTER EXPLANATION SECTION -->
+        <!-- THE INDIRECT MEASUREMENT PROBLEM -->
         <div class="explanation-section">
-            <h2>📚 What is the Kalman Filter?</h2>
+            <h2>💡 The Indirect Measurement Problem</h2>
             
             <p style="color: #4a5568; line-height: 1.8; margin-bottom: 20px;">
-                The <strong style="color: #1a365d;">Kalman Filter</strong> is a smart way to estimate the TRUE value from NOISY measurements. 
-                Think of it as a "best guess" algorithm that gets better over time by learning from data.
+                <strong style="color: #1a365d;">Goal:</strong> Estimate the true temperature of a light bulb inside a closed room. 
+                The problem? <strong style="color: #c53030;">We cannot measure the bulb temperature directly</strong> because sensors cannot be attached to the hot bulb surface!
             </p>
 
-            <!-- PROBABILITY CONNECTION -->
-            <div style="background: #fffbeb; border: 2px solid #d69e2e; border-radius: 12px; padding: 20px; margin: 20px 0;">
-                <h3 style="color: #975a16; margin-bottom: 15px;">🎲 How Does This Relate to Probability?</h3>
+            <div style="background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%); border: 2px solid #fc8181; border-radius: 12px; padding: 25px; margin: 20px 0;">
+                <h3 style="color: #c53030; margin-bottom: 15px;">🚫 Why "Indirect"?</h3>
+                <ul style="color: #4a5568; line-height: 2; font-size: 1.05rem;">
+                    <li>The bulb is too hot to attach sensors directly</li>
+                    <li>We can only measure the <strong>air temperature nearby</strong></li>
+                    <li>Each air sensor gives a <strong>noisy and biased</strong> reading</li>
+                    <li>Neither sensor directly tells us T<sub>bulb</sub> — it's a <strong>hidden variable</strong></li>
+                </ul>
+            </div>
+
+            <!-- TWO SENSOR SETUP -->
+            <div style="background: #fffbeb; border: 2px solid #d69e2e; border-radius: 12px; padding: 25px; margin: 20px 0;">
+                <h3 style="color: #975a16; margin-bottom: 15px;">🔬 Two Sensor Setup</h3>
                 
                 <p style="color: #4a5568; line-height: 1.8; margin-bottom: 15px;">
-                    The Kalman Filter is <strong>ALL about probability!</strong> Here's the key insight:
+                    We have <strong>two different sensors</strong> measuring air temperature near the bulb. Each has different characteristics:
                 </p>
                 
-                <div style="background: #fef3c7; border-radius: 10px; padding: 20px; margin: 15px 0;">
-                    <div style="text-align: center; margin-bottom: 15px;">
-                        <span style="font-size: 1.5rem;">🎯 True Value</span>
-                        <span style="font-size: 1.5rem; color: #1a365d; margin: 0 10px;">=</span>
-                        <span style="font-size: 1.5rem;">📏 Measurement</span>
-                        <span style="font-size: 1.5rem; color: #1a365d; margin: 0 10px;">+</span>
-                        <span style="font-size: 1.5rem; color: #c53030;">🎲 Random Noise</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: #fff4ed; border: 2px solid #e67e22; border-radius: 10px; padding: 20px;">
+                        <h4 style="color: #e67e22; margin-bottom: 10px;">🟠 Sensor A (Near-Bulb Air)</h4>
+                        <ul style="color: #4a5568; line-height: 1.8; font-size: 0.95rem;">
+                            <li><strong>Position:</strong> Very close to bulb</li>
+                            <li><strong>Response:</strong> ✅ Fast (tracks changes quickly)</li>
+                            <li><strong>Noise:</strong> ❌ High (fluctuates a lot)</li>
+                            <li><strong>Reading:</strong> z<sub>A</sub> = 0.9 × T<sub>bulb</sub> + noise</li>
+                            <li><strong>Variance:</strong> R<sub>A</sub> = 25</li>
+                        </ul>
                     </div>
-                    <p style="text-align: center; color: #744210; font-size: 0.9rem;">
-                        Every measurement has random error - the Kalman Filter removes it!
+                    
+                    <div style="background: #eff6fc; border: 2px solid #3498db; border-radius: 10px; padding: 20px;">
+                        <h4 style="color: #3498db; margin-bottom: 10px;">🔵 Sensor B (Room-Air)</h4>
+                        <ul style="color: #4a5568; line-height: 1.8; font-size: 0.95rem;">
+                            <li><strong>Position:</strong> Farther in room</li>
+                            <li><strong>Response:</strong> ❌ Slow (thermal lag)</li>
+                            <li><strong>Noise:</strong> ✅ Low (more stable)</li>
+                            <li><strong>Reading:</strong> z<sub>B</sub> = 0.6 × T<sub>bulb</sub> + noise</li>
+                            <li><strong>Variance:</strong> R<sub>B</sub> = 9</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="background: #fef3c7; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                    <p style="text-align: center; color: #744210; font-size: 1.1rem; font-weight: 600;">
+                        🎯 Goal: Combine both sensors to estimate the hidden T<sub>bulb</sub> optimally!
                     </p>
                 </div>
 
-                <div class="step-grid" style="margin-top: 20px;">
-                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
-                        <h4 style="color: #1a365d;">📊 Gaussian Distribution</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
-                            The filter assumes measurements follow a <strong>Normal (Gaussian) distribution</strong>. 
-                            Most measurements cluster around the true value, with fewer far away.
-                        </p>
-                    </div>
-                    
-                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
-                        <h4 style="color: #1a365d;">📈 Variance = Uncertainty</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
-                            <strong>Variance (σ²)</strong> measures how spread out the data is. 
-                            High variance = high uncertainty. The filter reduces variance!
-                        </p>
-                    </div>
-                    
-                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
-                        <h4 style="color: #1a365d;">⚖️ Weighted Average</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
-                            The filter combines prediction + measurement using a <strong>weighted average</strong>. 
-                            More reliable source gets more weight!
-                        </p>
-                    </div>
-                    
-                    <div style="background: #fef9e7; padding: 15px; border-radius: 10px; border: 1px solid #f6e05e;">
-                        <h4 style="color: #1a365d;">🔄 Bayes' Theorem</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem; margin-top: 8px;">
-                            Kalman Filter is actually <strong>recursive Bayesian estimation</strong>! 
-                            It updates beliefs based on new evidence (measurements).
-                        </p>
-                    </div>
-                </div>
             </div>
 
-            <!-- SIMPLE MATH -->
-            <h3 style="color: #1a365d; margin: 25px 0 15px;">🔢 The Simple Math (Just 3 Steps!)</h3>
+            <!-- PROBABILISTIC MODELS -->
+            <h3 style="color: #1a365d; margin: 30px 0 15px;">🎲 Probabilistic Models (No Matrices!)</h3>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-                
-                <!-- Step 1 -->
-                <div class="equation-box" style="border-left: 4px solid #276749;">
-                    <div class="equation-label">STEP 1: Calculate the "Trust Factor"</div>
-                    <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
-                        K = <span style="color: #276749;">P</span> / (<span style="color: #276749;">P</span> + <span style="color: #c53030;">R</span>)
-                    </div>
-                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
-                        <strong>K</strong> = Kalman Gain (how much to trust measurement)<br>
-                        <span style="color: #276749;"><strong>P</strong></span> = Our current uncertainty<br>
-                        <span style="color: #c53030;"><strong>R</strong></span> = Measurement noise (sensor error)
-                    </div>
-                    <div style="margin-top: 10px; padding: 10px; background: #f0fff4; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
-                        💡 <strong>Example:</strong> If P=5 and R=10, then K = 5/(5+10) = <strong>0.33</strong><br>
-                        This means we trust the measurement 33%
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                <div style="background: #edf7ed; padding: 20px; border-radius: 10px; border: 2px solid #38a169;">
+                    <h4 style="color: #276749;">1️⃣ State Model</h4>
+                    <p style="color: #4a5568; font-size: 0.95rem; margin-top: 10px; line-height: 1.7;">
+                        How the bulb temperature evolves over time:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #1a365d;">
+                            T<sub>bulb</sub>(k) = T<sub>bulb</sub>(k-1) + w
+                        </p>
+                        <p style="text-align: center; font-size: 0.85rem; color: #718096; margin-top: 8px;">
+                            w ~ N(0, Q) is process noise
+                        </p>
                     </div>
                 </div>
                 
-                <!-- Step 2 -->
-                <div class="equation-box" style="border-left: 4px solid #d69e2e;">
-                    <div class="equation-label">STEP 2: Update Our Estimate</div>
-                    <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
-                        New = Old + K × (Measurement - Old)
-                    </div>
-                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
-                        This is just a <strong>weighted average</strong>!<br>
-                        We move from our old estimate toward the measurement.<br>
-                        K controls how far we move.
-                    </div>
-                    <div style="margin-top: 10px; padding: 10px; background: #fffbeb; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
-                        💡 <strong>Example:</strong> Old=100, Measurement=110, K=0.33<br>
-                        New = 100 + 0.33 × (110-100) = 100 + 3.3 = <strong>103.3</strong>
+                <div style="background: #fff4ed; padding: 20px; border-radius: 10px; border: 2px solid #e67e22;">
+                    <h4 style="color: #c05621;">2️⃣ Sensor A Model</h4>
+                    <p style="color: #4a5568; font-size: 0.95rem; margin-top: 10px; line-height: 1.7;">
+                        What Sensor A measures:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #1a365d;">
+                            z<sub>A</sub> = 0.9 × T<sub>bulb</sub> + v<sub>A</sub>
+                        </p>
+                        <p style="text-align: center; font-size: 0.85rem; color: #718096; margin-top: 8px;">
+                            v<sub>A</sub> ~ N(0, 25)
+                        </p>
                     </div>
                 </div>
                 
-                <!-- Step 3 -->
-                <div class="equation-box" style="border-left: 4px solid #c53030;">
-                    <div class="equation-label">STEP 3: Update Uncertainty</div>
-                    <div class="equation" style="font-size: 1.5rem; margin: 15px 0;">
-                        P<sub>new</sub> = (1 - K) × P<sub>old</sub>
-                    </div>
-                    <div style="font-size: 0.9rem; color: #4a5568; line-height: 1.6;">
-                        After using a measurement, we're more confident!<br>
-                        Our uncertainty <strong>decreases</strong>.<br>
-                        The more measurements, the more accurate.
-                    </div>
-                    <div style="margin-top: 10px; padding: 10px; background: #fff5f5; border-radius: 6px; font-size: 0.85rem; color: #2d3748;">
-                        💡 <strong>Example:</strong> P=5, K=0.33<br>
-                        P<sub>new</sub> = (1-0.33) × 5 = 0.67 × 5 = <strong>3.35</strong><br>
-                        Uncertainty dropped from 5 to 3.35! 🎉
+                <div style="background: #eff6fc; padding: 20px; border-radius: 10px; border: 2px solid #3498db;">
+                    <h4 style="color: #2c5282;">3️⃣ Sensor B Model</h4>
+                    <p style="color: #4a5568; font-size: 0.95rem; margin-top: 10px; line-height: 1.7;">
+                        What Sensor B measures:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                        <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #1a365d;">
+                            z<sub>B</sub> = 0.6 × T<sub>bulb</sub> + v<sub>B</sub>
+                        </p>
+                        <p style="text-align: center; font-size: 0.85rem; color: #718096; margin-top: 8px;">
+                            v<sub>B</sub> ~ N(0, 9)
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- INTUITIVE EXPLANATION -->
-            <h3 style="color: #1a365d; margin: 30px 0 15px;">🧠 The Intuition (No Math Needed!)</h3>
+            <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                <h4 style="color: #234e52; margin-bottom: 12px;">💡 Key Insight: Why This is Probabilistic</h4>
+                <ul style="color: #4a5568; line-height: 2; font-size: 1.rem;">
+                    <li><strong>Hidden Variable:</strong> T<sub>bulb</sub> cannot be observed directly</li>
+                    <li><strong>Gaussian Noise:</strong> All measurements have random errors following Normal distribution</li>
+                    <li><strong>Conditional Probability:</strong> We estimate P(T<sub>bulb</sub> | z<sub>A</sub>, z<sub>B</sub>)</li>
+                    <li><strong>Weighted Average:</strong> Kalman Filter dynamically chooses how much to trust each sensor</li>
+                </ul>
+            </div>
+
+            <!-- SCALAR KALMAN FILTER EQUATIONS -->
+            <h3 style="color: #1a365d; margin: 25px 0 15px;">🔢 Scalar Kalman Filter Equations (No Matrices!)</h3>
+            
+            <div style="background: #f7fafc; border: 2px solid #1a365d; border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                <p style="color: #4a5568; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
+                    The beauty of this problem: <strong>all equations are simple arithmetic</strong>. No matrix multiplication needed!
+                </p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <!-- Step 1-2: Prediction -->
+                    <div style="background: #edf7ed; padding: 20px; border-radius: 10px; border-left: 4px solid #38a169;">
+                        <h4 style="color: #276749; margin-bottom: 12px;">1️⃣ Prediction</h4>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1a365d;">
+                                Ť = T̂<sub>previous</sub>
+                            </p>
+                            <p style="font-size: 0.85rem; color: #718096; margin-top: 5px;">
+                                (Predicted temperature = last estimate)
+                            </p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1a365d;">
+                                P̌ = P + Q
+                            </p>
+                            <p style="font-size: 0.85rem; color: #718096; margin-top: 5px;">
+                                (Uncertainty grows by process noise)
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Kalman Gain -->
+                    <div style="background: #fff4ed; padding: 20px; border-radius: 10px; border-left: 4px solid #e67e22;">
+                        <h4 style="color: #c05621; margin-bottom: 12px;">2️⃣ Kalman Gain</h4>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1a365d;">
+                                K = (H × P̌) / (H² × P̌ + R)
+                            </p>
+                            <p style="font-size: 0.85rem; color: #718096; margin-top: 5px;">
+                                H = sensor coefficient (0.9 or 0.6)<br>
+                                R = sensor noise variance
+                            </p>
+                        </div>
+                        <p style="color: #c05621; font-weight: 600; margin-top: 10px;">
+                            🎯 K tells us how much to trust this sensor!
+                        </p>
+                    </div>
+                    
+                    <!-- Step 4-5: Update -->
+                    <div style="background: #eff6fc; padding: 20px; border-radius: 10px; border-left: 4px solid #3498db;">
+                        <h4 style="color: #2c5282; margin-bottom: 12px;">3️⃣ Update</h4>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1a365d;">
+                                T̂ = Ť + K × (z - H × Ť)
+                            </p>
+                            <p style="font-size: 0.85rem; color: #718096; margin-top: 5px;">
+                                (Correct prediction using measurement)
+                            </p>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                            <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #1a365d;">
+                                P = (1 - K × H) × P̌
+                            </p>
+                            <p style="font-size: 0.85rem; color: #718096; margin-top: 5px;">
+                                (Uncertainty decreases!)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #fef3c7; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                    <p style="color: #744210; font-weight: 600; margin-bottom: 10px;">📝 Process for Each Time Step:</p>
+                    <ol style="color: #4a5568; line-height: 2;">
+                        <li>Run prediction (steps 1-2) <strong>once</strong></li>
+                        <li>Update with <strong>Sensor A</strong> (steps 3-5)</li>
+                        <li>Update with <strong>Sensor B</strong> (steps 3-5)</li>
+                        <li>Repeat for next time step!</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- DYNAMIC TRUST EXPLANATION -->
+            <h3 style="color: #1a365d; margin: 30px 0 15px;">⚖️ Kalman Gain as Dynamic Trust</h3>
             
             <div style="background: #f7fafc; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
-                        <h4 style="color: #1a365d; margin-bottom: 10px;">It's Like Averaging</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem;">
-                            Imagine you're trying to guess someone's height. You take multiple measurements with a noisy ruler. 
-                            <strong>Averaging</strong> all measurements gives a better estimate than any single one. 
-                            Kalman Filter does this, but <em>smarter</em>!
+                <p style="color: #4a5568; line-height: 1.8; margin-bottom: 20px; font-size: 1.05rem;">
+                    The <strong>Kalman Gain (K)</strong> acts like a "trust score" that changes dynamically at each time step. 
+                    It answers: <em>"How much should I believe this sensor right now?"</em>
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div style="background: #fff4ed; border: 2px solid #e67e22; border-radius: 10px; padding: 20px;">
+                        <h4 style="color: #e67e22; margin-bottom: 15px;">🟠 Trusting Sensor A</h4>
+                        <p style="color: #4a5568; line-height: 1.7; margin-bottom: 12px;">
+                            Sensor A is <strong>fast but noisy</strong>. The Kalman Gain for Sensor A depends on:
                         </p>
+                        <ul style="color: #4a5568; line-height: 1.8;">
+                            <li>If we're <strong>very uncertain</strong> (high P): K<sub>A</sub> ≈ 0.5 (trust it more)</li>
+                            <li>If we're <strong>confident</strong> (low P): K<sub>A</sub> ≈ 0.2 (trust prediction more)</li>
+                            <li>High noise R<sub>A</sub> = 25 means we can't fully trust it</li>
+                        </ul>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <p style="font-family: 'JetBrains Mono', monospace; text-align: center; color: #1a365d;">
+                                K<sub>A</sub> = (0.9 × P) / (0.81P + 25)
+                            </p>
+                        </div>
                     </div>
                     
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">⚖️</div>
-                        <h4 style="color: #1a365d; margin-bottom: 10px;">Trust the Best Source</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem;">
-                            If your friend is good at estimating, trust them more. If the ruler is accurate, trust it more. 
-                            <strong>Kalman Gain (K)</strong> automatically figures out who to trust based on 
-                            how noisy each source is.
+                    <div style="background: #eff6fc; border: 2px solid #3498db; border-radius: 10px; padding: 20px;">
+                        <h4 style="color: #3498db; margin-bottom: 15px;">🔵 Trusting Sensor B</h4>
+                        <p style="color: #4a5568; line-height: 1.7; margin-bottom: 12px;">
+                            Sensor B is <strong>slow but stable</strong>. The Kalman Gain for Sensor B depends on:
+                        </p>
+                        <ul style="color: #4a5568; line-height: 1.8;">
+                            <li>Low noise R<sub>B</sub> = 9 means <strong>more reliable</strong></li>
+                            <li>But H<sub>B</sub> = 0.6 means it only sees 60% of bulb temp</li>
+                            <li>Often gets K<sub>B</sub> ≈ 0.4-0.6 (trusted more than A)</li>
+                        </ul>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                            <p style="font-family: 'JetBrains Mono', monospace; text-align: center; color: #1a365d;">
+                                K<sub>B</sub> = (0.6 × P) / (0.36P + 9)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #e6fffa; border: 2px solid #38b2ac; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                    <h4 style="color: #234e52; margin-bottom: 12px;">💡 Weighted Average Interpretation</h4>
+                    <p style="color: #4a5568; line-height: 1.8; margin-bottom: 10px;">
+                        The update equation can be rewritten as a weighted average:
+                    </p>
+                    <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; color: #1a365d;">
+                            T̂<sub>new</sub> = (1 - K×H) × T̂<sub>pred</sub> + K × (z/H)
                         </p>
                     </div>
-                    
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="font-size: 3rem; margin-bottom: 10px;">📈</div>
-                        <h4 style="color: #1a365d; margin-bottom: 10px;">Gets Better Over Time</h4>
-                        <p style="color: #4a5568; font-size: 0.9rem;">
-                            Each new measurement makes the filter more confident. It's like how your estimate of a friend's 
-                            arrival time gets better as you get more updates. <strong>More data = less uncertainty!</strong>
-                        </p>
-                    </div>
+                    <p style="color: #4a5568; line-height: 1.8;">
+                        This shows the filter is <strong>dynamically balancing</strong> between:
+                    </p>
+                    <ul style="color: #4a5568; line-height: 1.8; margin-top: 10px;">
+                        <li>Our prediction (based on physics model)</li>
+                        <li>Sensor A reading (fast but noisy)</li>
+                        <li>Sensor B reading (slow but stable)</li>
+                    </ul>
                 </div>
             </div>
 
@@ -1425,93 +1527,189 @@
         <!-- ============================================================ -->
         <div class="tab-content" id="tab-calculator">
         <div class="calculator-section">
-            <h2>🧮 Kalman Filter Calculator</h2>
+            <h2>🧮 Step-by-Step Calculation</h2>
             <p style="color: #4a5568; margin-bottom: 20px;">
-                Try calculating one step of the Kalman filter yourself! Enter the values below and click "Calculate" to see the step-by-step computation.
+                Work through one complete time step of the two-sensor Kalman filter. Enter your values and see how the filter processes both sensors sequentially!
             </p>
             
-            <div class="calc-grid">
-                <div class="calc-inputs">
-                    <h4>📥 Input Values</h4>
-                    
-                    <div class="input-group">
-                        <label>Previous State Estimate (x̂<sub>k-1</sub>)</label>
-                        <input type="number" id="calcPrevState" value="100" step="any">
+            <div style="background: #fffbeb; border: 2px solid #d69e2e; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
+                <h4 style="color: #975a16; margin-bottom: 10px;">📝 Scenario</h4>
+                <p style="color: #4a5568; line-height: 1.8;">
+                    You have estimated the bulb temperature at <strong>80°C</strong> with uncertainty P=16. 
+                    At the next time step, Sensor A reads <strong>78°C</strong> and Sensor B reads <strong>52°C</strong>. 
+                    Let's see how the Kalman Filter processes both measurements!
+                </p>
+            </div>
+            
+            <!-- GIVEN VALUES -->
+            <div style="background: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="color: #1a365d; margin-bottom: 15px;">📋 Given</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div style="padding: 12px; background: #f7fafc; border-radius: 8px;">
+                        <div style="font-size: 0.85rem; color: #718096;">Previous Estimate</div>
+                        <div style="font-size: 1.3rem; font-weight: 600; color: #1a365d;">T̂ = 80°C</div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Previous Error Covariance (P<sub>k-1</sub>)</label>
-                        <input type="number" id="calcPrevP" value="4" step="any">
+                    <div style="padding: 12px; background: #f7fafc; border-radius: 8px;">
+                        <div style="font-size: 0.85rem; color: #718096;">Uncertainty</div>
+                        <div style="font-size: 1.3rem; font-weight: 600; color: #1a365d;">P = 16</div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label>New Measurement (z<sub>k</sub>)</label>
-                        <input type="number" id="calcMeasurement" value="105" step="any">
+                    <div style="padding: 12px; background: #fff4ed; border-radius: 8px;">
+                        <div style="font-size: 0.85rem; color: #718096;">Sensor A Reading</div>
+                        <div style="font-size: 1.3rem; font-weight: 600; color: #e67e22;">z<sub>A</sub> = 78°C</div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Process Noise (Q)</label>
-                        <input type="number" id="calcQ" value="1" step="any">
+                    <div style="padding: 12px; background: #eff6fc; border-radius: 8px;">
+                        <div style="font-size: 0.85rem; color: #718096;">Sensor B Reading</div>
+                        <div style="font-size: 1.3rem; font-weight: 600; color: #3498db;">z<sub>B</sub> = 52°C</div>
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Measurement Noise (R)</label>
-                        <input type="number" id="calcR" value="10" step="any">
+                    <div style="padding: 12px; background: #f7fafc; border-radius: 8px;">
+                        <div style="font-size: 0.85rem; color: #718096;">Process Noise</div>
+                        <div style="font-size: 1.3rem; font-weight: 600; color: #1a365d;">Q = 4</div>
                     </div>
-                    
-                    <button class="calc-btn" onclick="calculateKalman()">🔢 Calculate One Step</button>
+                </div>
+            </div>
+
+            <!-- STEP 1-2: PREDICTION -->
+            <div style="background: linear-gradient(135deg, #edf7ed 0%, #d4edda 100%); border: 2px solid #38a169; border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: #276749; margin-bottom: 15px;">1️⃣ Prediction Phase</h3>
+                <p style="color: #4a5568; margin-bottom: 15px; line-height: 1.7;">
+                    Before looking at any sensors, we predict where the temperature should be:
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #276749; margin-bottom: 10px;">Predicted Temperature</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: #1a365d; margin: 10px 0;">
+                            Ť = T̂ = 80°C
+                        </p>
+                        <p style="font-size: 0.9rem; color: #718096;">(stays same in scalar model)</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <h4 style="color: #276749; margin-bottom: 10px;">Predicted Uncertainty</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: #1a365d; margin: 10px 0;">
+                            P̌ = P + Q = 16 + 4 = <strong>20</strong>
+                        </p>
+                        <p style="font-size: 0.9rem; color: #718096;">(uncertainty grows!)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3-5: UPDATE WITH SENSOR A -->
+            <div style="background: linear-gradient(135deg, #fff4ed 0%, #fedcbc 100%); border: 2px solid #e67e22; border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: #c05621; margin-bottom: 15px;">2️⃣ Update with 🟠 Sensor A (H<sub>A</sub>=0.9, R<sub>A</sub>=25)</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e67e22; font-size: 0.95rem; margin-bottom: 8px;">Kalman Gain</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            K<sub>A</sub> = (0.9 × 20) / (0.81 × 20 + 25)
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 18 / 41.2 = <strong style="color: #e67e22;">0.437</strong>
+                        </p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e67e22; font-size: 0.95rem; margin-bottom: 8px;">Innovation</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            z<sub>A</sub> - H<sub>A</sub>×Ť = 78 - 0.9×80
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 78 - 72 = <strong style="color: #e67e22;">+6°C</strong>
+                        </p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e67e22; font-size: 0.95rem; margin-bottom: 8px;">New Estimate</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            T̂ = 80 + 0.437 × 6
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = <strong style="color: #e67e22;">82.6°C</strong>
+                        </p>
+                    </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #e67e22; font-size: 0.95rem; margin-bottom: 8px;">New Uncertainty</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            P = (1 - 0.437×0.9) × 20
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 0.607 × 20 = <strong style="color: #e67e22;">12.1</strong>
+                        </p>
+                    </div>
                 </div>
                 
-                <div class="calc-results">
-                    <h4>📤 Results</h4>
-                    
-                    <div class="calc-step">
-                        <div class="step-title">Step 1: Predict</div>
-                        <div class="step-formula" id="calcStep1">
-                            x̂<sub>pred</sub> = 100<br>
-                            P<sub>pred</sub> = 4 + 1 = 5
-                        </div>
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <p style="color: #4a5568; font-weight: 600;">
+                        💡 After Sensor A: T̂ = 82.6°C, P = 12.1 (uncertainty reduced from 20 → 12.1)
+                    </p>
+                </div>
+            </div>
+
+            <!-- STEP 3-5: UPDATE WITH SENSOR B -->
+            <div style="background: linear-gradient(135deg, #eff6fc 0%, #c3ddfd 100%); border: 2px solid #3498db; border-radius: 12px; padding: 25px; margin-bottom: 20px;">
+                <h3 style="color: #2c5282; margin-bottom: 15px;">3️⃣ Update with 🔵 Sensor B (H<sub>B</sub>=0.6, R<sub>B</sub>=9)</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; font-size: 0.95rem; margin-bottom: 8px;">Kalman Gain</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            K<sub>B</sub> = (0.6 × 12.1) / (0.36 × 12.1 + 9)
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 7.26 / 13.36 = <strong style="color: #3498db;">0.543</strong>
+                        </p>
                     </div>
-                    
-                    <div class="calc-step">
-                        <div class="step-title">Step 2: Kalman Gain</div>
-                        <div class="step-formula" id="calcStep2">
-                            K = 5 / (5 + 10) = 0.333
-                        </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; font-size: 0.95rem; margin-bottom: 8px;">Innovation</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            z<sub>B</sub> - H<sub>B</sub>×T̂ = 52 - 0.6×82.6
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 52 - 49.6 = <strong style="color: #3498db;">+2.4°C</strong>
+                        </p>
                     </div>
-                    
-                    <div class="calc-step">
-                        <div class="step-title">Step 3: Update State</div>
-                        <div class="step-formula" id="calcStep3">
-                            x̂<sub>new</sub> = 100 + 0.333 × (105 - 100) = 101.67
-                        </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; font-size: 0.95rem; margin-bottom: 8px;">New Estimate</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            T̂ = 82.6 + 0.543 × 2.4
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = <strong style="color: #3498db;">83.9°C</strong>
+                        </p>
                     </div>
-                    
-                    <div class="calc-step">
-                        <div class="step-title">Step 4: Update Covariance</div>
-                        <div class="step-formula" id="calcStep4">
-                            P<sub>new</sub> = (1 - 0.333) × 5 = 3.33
-                        </div>
+                    <div style="background: white; padding: 15px; border-radius: 8px;">
+                        <h4 style="color: #3498db; font-size: 0.95rem; margin-bottom: 8px;">New Uncertainty</h4>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d;">
+                            P = (1 - 0.543×0.6) × 12.1
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #1a365d; margin-top: 5px;">
+                            = 0.674 × 12.1 = <strong style="color: #3498db;">8.2</strong>
+                        </p>
                     </div>
-                    
-                    <div style="margin-top: 15px; padding: 15px; background: #f0fff4; border-radius: 8px; border: 1px solid #9ae6b4;">
-                        <div class="result-row">
-                            <span class="result-label">New State Estimate (x̂<sub>k</sub>)</span>
-                            <span class="result-value" id="calcResultX">101.67</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="result-label">New Error Covariance (P<sub>k</sub>)</span>
-                            <span class="result-value" id="calcResultP">3.33</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="result-label">Kalman Gain (K)</span>
-                            <span class="result-value" id="calcResultK">0.333</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; font-size: 0.85rem; color: #718096;">
-                        💡 <strong>Interpretation:</strong> <span id="calcInterpretation">With K=0.333, the filter trusts the measurement 33% and the prediction 67%.</span>
-                    </div>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.7); padding: 15px; border-radius: 8px;">
+                    <p style="color: #4a5568; font-weight: 600;">
+                        💡 After Sensor B: T̂ = 83.9°C, P = 8.2 (uncertainty further reduced 12.1 → 8.2)
+                    </p>
+                </div>
+            </div>
+
+            <!-- FINAL SUMMARY -->
+            <div style="background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%); border: 3px solid #38b2ac; border-radius: 12px; padding: 30px;">
+                <h3 style="color: #234e52; margin-bottom: 15px; font-size: 1.5rem;">🎯 Final Result</h3>
+                <div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: #1a365d;">T<sub>bulb</sub> ≈ 83.9°C</div>
+                    <div style="font-size: 1.2rem; color: #4a5568; margin-top: 10px;">Uncertainty reduced from 20 → 8.2 (59% decrease!)</div>
+                </div>
+                
+                <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px;">
+                    <h4 style="color: #234e52; margin-bottom: 12px;">📊 What Happened?</h4>
+                    <ul style="color: #4a5568; line-height: 2;">
+                        <li>Started with prediction: 80°C ± 4.47 (P=20)</li>
+                        <li>Sensor A (fast but noisy) pushed estimate up to 82.6°C</li>
+                        <li>Sensor B (slow but stable) fine-tuned to 83.9°C</li>
+                        <li>Both sensors combined = <strong>more accurate than either alone!</strong></li>
+                        <li>Final uncertainty: ±2.86°C (P=8.2)</li>
+                    </ul>
                 </div>
             </div>
         </div>
