@@ -1,0 +1,22 @@
+# Python scripts (development only)
+*.py
+
+# LaTeX files (development only)
+*.tex
+*.aux
+*.log
+
+# Extra PDFs (keep only poster_landscape.pdf)
+poster.pdf
+poster_simple.pdf
+poster_temperature.pdf
+
+# Old/backup HTML files
+index_old_interactive.html
+kalman-realdata.html
+
+# Extra images (development only)
+KalmanFilter.png
+RealDataGraph.png
+SensorPlacement (1).png
+state_observer_diagram.png
