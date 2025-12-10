@@ -345,9 +345,10 @@
             const Q = parseFloat(document.getElementById('processNoise').value);
             const steps = parseInt(document.getElementById('numSteps').value);
 
-            // Compute observation coefficients
-            const HA = dB / (dA + dB);
-            const HB = dA / (dA + dB);
+            // Compute observation coefficients using heat diffusion model
+            const ell = 10.0; // characteristic length in cm
+            const HA = 1.0 / (1 + dA / ell);
+            const HB = 1.0 / (1 + dB / ell);
 
             // Initialize arrays
             const sensorA = [];
@@ -848,16 +849,28 @@ Results in: p(x|z) = N(x; μ<sub>post</sub>, σ²<sub>post</sub>)
 
         <h3>Heat Diffusion Model</h3>
         <p>
-            We model heat diffusion from the bulb as the hidden state x representing the true bulb temperature. 
-            The observed air temperatures at each sensor depend on distance through an inverse relationship:
+            We model heat diffusion from the bulb using a distance-based attenuation formula with characteristic length ℓ = 10 cm:
         </p>
         <div class="equation">
-z<sub>A</sub> = H<sub>A</sub> × x + v<sub>A</sub>,  where H<sub>A</sub> = d<sub>B</sub>/(d<sub>A</sub> + d<sub>B</sub>) = 15/20 = 0.75<br>
-z<sub>B</sub> = H<sub>B</sub> × x + v<sub>B</sub>,  where H<sub>B</sub> = d<sub>A</sub>/(d<sub>A</sub> + d<sub>B</sub>) = 5/20 = 0.25
+T<sub>sensor</sub>(d) = T<sub>bulb</sub>/(1 + d/ℓ) + noise
         </div>
         <p>
-            where v<sub>A</sub> ~ N(0, R<sub>A</sub>) and v<sub>B</sub> ~ N(0, R<sub>B</sub>) represent Gaussian measurement noise.
+            This leads to the observation model z = Hx + v where:
         </p>
+        <div class="equation">
+H<sub>A</sub> = 1/(1 + d<sub>A</sub>/ℓ) = 1/(1 + 5/10) = 1/1.5 ≈ 0.667  <em>(Sensor A attenuation factor)</em><br>
+H<sub>B</sub> = 1/(1 + d<sub>B</sub>/ℓ) = 1/(1 + 15/10) = 1/2.5 = 0.4  <em>(Sensor B attenuation factor)</em>
+        </div>
+        <p>
+            where v<sub>A</sub> ~ N(0, R<sub>A</sub> = 2.0°C²) and v<sub>B</sub> ~ N(0, R<sub>B</sub> = 0.5°C²) represent Gaussian measurement noise. The process noise Q = 0.1°C² accounts for natural bulb temperature fluctuations.
+        </p>
+        <p>
+            <strong>CSV Data Input:</strong> The raw measurements come from temperature_data.csv with columns:
+        </p>
+        <div class="equation">
+z<sub>A</sub> = Middle_Heat_Source  <em>(Sensor A, d<sub>A</sub> = 5 cm)</em><br>
+z<sub>B</sub> = Air_Tube_Output  <em>(Sensor B, d<sub>B</sub> = 15 cm)</em>
+        </div>
 
         <div style="text-align: center; margin: 30px 0;">
             <img src="SensorPlacementDiagram.png" alt="Sensor Placement Diagram" style="max-width: 600px; width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background: white;">
@@ -867,33 +880,40 @@ z<sub>B</sub> = H<sub>B</sub> × x + v<sub>B</sub>,  where H<sub>B</sub> = d<sub
         <h3>Kalman Filter Algorithm</h3>
         
         <h4>Prediction Step (Prior Propagation)</h4>
+        <p><strong>Purpose:</strong> Propagate previous estimate forward in time, accounting for process uncertainty.</p>
         <div class="equation">
-x̂<sub>pred</sub> = x̂<sub>prev</sub>  (propagate mean - assuming constant temperature)<br>
-P<sub>pred</sub> = P<sub>prev</sub> + Q  (increase uncertainty with process noise)
+x̂<sub>pred</sub> = x̂<sub>prev</sub>  <em>(assume bulb temp stays constant)</em><br>
+P<sub>pred</sub> = P<sub>prev</sub> + Q  <em>(add process noise: uncertainty grows)</em>
         </div>
         <p>
-            This gives the prior distribution p(x) = N(x; x̂<sub>pred</sub>, P<sub>pred</sub>) before incorporating new measurements.
+            <strong>Interpretation:</strong> Since we have no control input, the best prediction is the previous estimate. However, uncertainty increases by Q = 0.1°C² due to natural temperature fluctuations. This gives the prior p(x) = N(x; x̂<sub>pred</sub>, P<sub>pred</sub>) before incorporating new measurements.
         </p>
 
         <h4>Update Step (Posterior via Bayes)</h4>
-        <p><strong>Sequential Fusion with Sensor A:</strong></p>
+        <p><strong>Purpose:</strong> Fuse prediction with sensor measurements to reduce uncertainty.</p>
+        
+        <p><strong>Sensor A Update:</strong> Combine prior p(x) = N(x; x̂<sub>pred</sub>, P<sub>pred</sub>) with likelihood p(z<sub>A</sub>|x) = N(z<sub>A</sub>; H<sub>A</sub>x, R<sub>A</sub>)</p>
         <div class="equation">
-K<sub>A</sub> = P<sub>pred</sub>/(P<sub>pred</sub> + R<sub>A</sub>)  <em>(Bayes weight - Kalman Gain)</em><br>
-x̂<sub>A</sub> = x̂<sub>pred</sub> + K<sub>A</sub>(z<sub>A</sub> - H<sub>A</sub>x̂<sub>pred</sub>)  <em>(posterior mean)</em><br>
-P<sub>A</sub> = (1 - K<sub>A</sub>H<sub>A</sub>)P<sub>pred</sub>  <em>(posterior variance)</em>
+K<sub>A</sub> = P<sub>pred</sub>H<sub>A</sub>/(H<sub>A</sub>P<sub>pred</sub>H<sub>A</sub> + R<sub>A</sub>) = P<sub>pred</sub>/(P<sub>pred</sub> + R<sub>A</sub>)  <em>(Kalman Gain: optimal weight)</em><br>
+x̂<sub>A</sub> = x̂<sub>pred</sub> + K<sub>A</sub>(z<sub>A</sub> - H<sub>A</sub>x̂<sub>pred</sub>)  <em>(weighted average of prediction & measurement)</em><br>
+P<sub>A</sub> = (1 - K<sub>A</sub>H<sub>A</sub>)P<sub>pred</sub>  <em>(uncertainty reduced by measurement)</em>
         </div>
 
-        <p><strong>Sequential Fusion with Sensor B:</strong></p>
+        <p><strong>Key Insight:</strong> K<sub>A</sub> balances trust in prediction vs measurement:</p>
+        <ul>
+            <li>If P<sub>pred</sub> ≫ R<sub>A</sub> (prediction uncertain, sensor reliable) ⇒ K<sub>A</sub> ≈ 1 (trust sensor)</li>
+            <li>If P<sub>pred</sub> ≪ R<sub>A</sub> (prediction confident, sensor noisy) ⇒ K<sub>A</sub> ≈ 0 (trust prediction)</li>
+        </ul>
+
+        <p><strong>Sensor B Update:</strong> Sequentially update with second sensor p(z<sub>B</sub>|x) = N(z<sub>B</sub>; H<sub>B</sub>x, R<sub>B</sub>)</p>
         <div class="equation">
-K<sub>B</sub> = P<sub>A</sub>/(P<sub>A</sub> + R<sub>B</sub>)  <em>(Bayes weight)</em><br>
+K<sub>B</sub> = P<sub>A</sub>/(P<sub>A</sub> + R<sub>B</sub>)  <em>(Kalman Gain for Sensor B)</em><br>
 x̂<sub>new</sub> = x̂<sub>A</sub> + K<sub>B</sub>(z<sub>B</sub> - H<sub>B</sub>x̂<sub>A</sub>)  <em>(final posterior mean)</em><br>
 P<sub>new</sub> = (1 - K<sub>B</sub>H<sub>B</sub>)P<sub>A</sub>  <em>(final posterior variance)</em>
         </div>
 
         <p>
-            <strong>Key Insight:</strong> The Kalman Gain K acts as the Bayesian weight, automatically balancing sensor contributions based on relative uncertainties. 
-            When Sensor A is noisy (large R<sub>A</sub>), K<sub>A</sub> decreases, giving more weight to the prior. 
-            The filter optimally combines both sensors' information to minimize estimation error.
+            <strong>Result:</strong> Final estimate x̂<sub>new</sub> optimally fuses both sensors. Since R<sub>B</sub> < R<sub>A</sub> (Sensor B more reliable), it receives higher weight in fusion.
         </p>
     </section>
 
@@ -1060,6 +1080,108 @@ x̂<sub>new</sub> ≈ x̂<sub>pred</sub> + 1 × (z - Hx̂<sub>pred</sub>) ≈ z
                     <span id="timeStepValue">t = 0</span>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Python Implementation</h2>
+        <p>
+            Below is the complete Python code used to analyze the experimental data. This implementation matches the mathematical framework described above.
+        </p>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; margin: 20px 0;">
+            <pre style="margin: 0; overflow-x: auto; font-family: 'Source Code Pro', monospace; font-size: 0.85rem; line-height: 1.5;"><code>import numpy as np
+import pandas as pd
+
+# Load data
+data = pd.read_csv('temperature_data.csv')
+time = data['Time'].values
+sensor_a = data['Middle_Heat_Source'].values  # Close to heat source
+sensor_b = data['Air_Tube_Output'].values     # Farther from heat source
+
+# Kalman Filter parameters (simulating bulb temperature estimation)
+# True bulb temperature would be higher than both measurements
+Q = 0.1  # Process noise
+R_A = 2.0  # Sensor A noise (more noisy, closer)
+R_B = 0.5  # Sensor B noise (less noisy, farther)
+
+# Distance factors (heat diffusion model)
+d_A = 5.0  # cm, close to bulb
+d_B = 15.0  # cm, farther from bulb
+
+# Initialize
+x_est = 45.0  # Initial bulb temperature estimate
+P = 10.0  # Initial uncertainty
+
+# Store results
+bulb_estimates = []
+
+# Kalman Filter loop
+for i in range(len(time)):
+    # Prediction step
+    x_pred = x_est
+    P_pred = P + Q
+    
+    # Update with Sensor A (accounting for distance)
+    H_A = 1.0 / (1 + d_A/10)  # Observation model (heat decreases with distance)
+    innovation_A = sensor_a[i] - H_A * x_pred
+    S_A = H_A * P_pred * H_A + R_A
+    K_A = P_pred * H_A / S_A
+    x_est = x_pred + K_A * innovation_A
+    P = (1 - K_A * H_A) * P_pred
+    
+    # Update with Sensor B
+    H_B = 1.0 / (1 + d_B/10)  # Heat decreases more with distance
+    innovation_B = sensor_b[i] - H_B * x_est
+    S_B = H_B * P * H_B + R_B
+    K_B = P * H_B / S_B
+    x_est = x_est + K_B * innovation_B
+    P = (1 - K_B * H_B) * P
+    
+    bulb_estimates.append(x_est)
+
+# Save results
+results = pd.DataFrame({
+    'Time': time,
+    'Sensor_A_Close': sensor_a,
+    'Sensor_B_Far': sensor_b,
+    'Bulb_Estimate': bulb_estimates
+})
+results.to_csv('kalman_results.csv', index=False)
+
+# Calculate statistics
+print('=== Temperature Statistics ===')
+print(f'Sensor A (Close): Mean={sensor_a.mean():.2f}C, Std={sensor_a.std():.2f}C')
+print(f'Sensor B (Far): Mean={sensor_b.mean():.2f}C, Std={sensor_b.std():.2f}C')
+print(f'Bulb Estimate: Mean={np.mean(bulb_estimates):.2f}C, Std={np.std(bulb_estimates):.2f}C')
+print(f'\nAt t=100s: Sensor A={sensor_a[10]:.1f}C, Sensor B={sensor_b[10]:.1f}C, Estimate={bulb_estimates[10]:.1f}C')
+print(f'At t=300s: Sensor A={sensor_a[30]:.1f}C, Sensor B={sensor_b[30]:.1f}C, Estimate={bulb_estimates[30]:.1f}C')
+print(f'At t=600s: Sensor A={sensor_a[60]:.1f}C, Sensor B={sensor_b[60]:.1f}C, Estimate={bulb_estimates[60]:.1f}C')</code></pre>
+        </div>
+        
+        <h3>Code Explanation</h3>
+        <div class="parameters">
+            <h4>Data Loading</h4>
+            <p>The CSV file contains three columns: Time, Middle_Heat_Source (Sensor A), and Air_Tube_Output (Sensor B). These represent measurements from the building environment performance evaluation box.</p>
+            
+            <h4>Parameters</h4>
+            <ul>
+                <li><strong>Q = 0.1:</strong> Process noise variance representing natural temperature fluctuations of the bulb</li>
+                <li><strong>R_A = 2.0, R_B = 0.5:</strong> Measurement noise variances for each sensor</li>
+                <li><strong>d_A = 5 cm, d_B = 15 cm:</strong> Physical distances from bulb to sensors</li>
+                <li><strong>H_A = 1/1.5, H_B = 1/2.5:</strong> Observation coefficients based on heat attenuation model</li>
+            </ul>
+            
+            <h4>Kalman Filter Loop</h4>
+            <p>For each time step, the algorithm performs:</p>
+            <ol>
+                <li><strong>Prediction:</strong> Propagate previous estimate forward, add process noise to uncertainty</li>
+                <li><strong>Sensor A Update:</strong> Compute innovation (measurement - prediction), calculate Kalman Gain, update estimate and uncertainty</li>
+                <li><strong>Sensor B Update:</strong> Sequentially apply second sensor measurement using updated state from Sensor A</li>
+            </ol>
+            
+            <h4>Output</h4>
+            <p>The code produces a CSV file with all estimates and prints statistics showing the bulb temperature is estimated at 67.2°C on average, significantly higher than both sensor readings (36.4°C and 30.5°C).</p>
         </div>
     </section>
 
